@@ -1,0 +1,12 @@
+
+{"jobId":"64de5b29-e55f-4b9d-bbfb-7b0e04a75a6b",
+"status":"enhanced",
+"score":3,
+"maCount":44,
+"hemCount":0,
+"exudateCount":95,
+"grade":3,
+"confidence":0.983771205,
+"gradeText":"Grade 3: Severe DR",
+"gradcam_url":"/uploads/jobs/64de5b29-e55f-4b9d-bbfb-7b0e04a75a6b/gradcam.png",
+"enhanced_url":"/uploads/jobs/64de5b29-e55f-4b9d-bbfb-7b0e04a75a6b/enhanced.png"}

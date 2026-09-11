@@ -5,12 +5,17 @@ const Patient = require("../models/Patient");
 const { labelForGrade } = require("../utils/gradeLabels");
 const { runMatlabPipeline } = require("../utils/runMatlabPipeline");
 const asyncHandler = require("../utils/asyncHandler");
+const { quickFundusCheck } = require("../utils/quickFundusCheck");
 
 // GET /api/analysis/:patientId
 const getAnalysisForPatient = asyncHandler(async (req, res) => {
-  const result = await AnalysisResult.findOne({ patientId: req.params.patientId });
+  const result = await AnalysisResult.findOne({
+    patientId: req.params.patientId,
+  });
   if (!result) {
-    return res.status(404).json({ error: `No analysis found for patient ${req.params.patientId}` });
+    return res
+      .status(404)
+      .json({ error: `No analysis found for patient ${req.params.patientId}` });
   }
   res.json(result);
 });
@@ -34,16 +39,54 @@ const uploadAndAnalyze = asyncHandler(async (req, res) => {
   const jobDir = req.jobDir;
   const jobId = req.jobId;
 
+  const check = await quickFundusCheck(imagePath);
+  if (!check.isFundus) {
+    const saved = await AnalysisResult.findOneAndUpdate(
+      { patientId },
+      {
+        $set: {
+          patientId,
+          status: "reject",
+          score: 0,
+          rejectReason: check.reason || null,
+        },
+        // ...AND clear out any stale fields from a previous successful run,
+        // otherwise old grade/confidence/lesion counts linger in the
+        // document and the frontend can end up showing "Grade 3: Severe
+        // DR, 99.2% confidence" for an image that was actually rejected.
+        $unset: {
+          grade: "",
+          gradeText: "",
+          confidence: "",
+          maCount: "",
+          hemCount: "",
+          exudateCount: "",
+          enhanced_url: "",
+          gradcam_url: "",
+        },
+      },
+      { upsert: true, new: true, setDefaultsOnInsert: true },
+    );
+    return res.json(saved);
+  }
+
   const raw = await runMatlabPipeline(imagePath, jobDir);
 
   const resultDoc = {
     ...raw,
-    gradeText: raw.grade != null ? labelForGrade(raw.grade) : "Awaiting analysis"
+    // Always force a valid status on a successful run. Don't rely on raw
+    // (MATLAB's result.json) to always include a status field — if it's
+    // missing for any reason, the *previous* saved status (e.g. "reject"
+    // from an earlier non-fundus upload) would otherwise linger forever,
+    // since findOneAndUpdate only touches fields you explicitly give it.
+    status: raw.status || "pass",
+    gradeText:
+      raw.grade != null ? labelForGrade(raw.grade) : "Awaiting analysis",
   };
 
   for (const [fname, key] of [
     ["gradcam.png", "gradcam_url"],
-    ["enhanced.png", "enhanced_url"]
+    ["enhanced.png", "enhanced_url"],
   ]) {
     if (!resultDoc[key]) {
       const filePath = path.join(jobDir, fname);
@@ -58,8 +101,13 @@ const uploadAndAnalyze = asyncHandler(async (req, res) => {
 
   const saved = await AnalysisResult.findOneAndUpdate(
     { patientId },
-    { patientId, ...resultDoc },
-    { upsert: true, new: true, setDefaultsOnInsert: true }
+    {
+      $set: { patientId, ...resultDoc },
+      // Clear the reject-specific field from any earlier rejected upload
+      // for this same patient, so it never lingers into a real result.
+      $unset: { rejectReason: "" },
+    },
+    { upsert: true, new: true, setDefaultsOnInsert: true },
   );
 
   res.json(saved);

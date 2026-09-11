@@ -13,7 +13,7 @@ npm install
 npm run dev
 ```
 
-Vite proxies `/api` and `/uploads` to `http://localhost:5000` (see
+Vite proxies `/api` and `/uploads` to `http://localhost:5001` (see
 `vite.config.js`) — start the backend first:
 
 ```bash

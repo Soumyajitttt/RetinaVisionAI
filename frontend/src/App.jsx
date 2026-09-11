@@ -11,6 +11,7 @@ import UserReportPage from "./pages/UserReportPage";
 import GradingDetailPage from "./pages/GradingDetailPage";
 import PdfReportPage from "./pages/PdfReportPage";
 import SpecialistsPage from "./pages/SpecialistsPage";
+import FundusAnalyzer from "./FundusAnalyzer";
 
 // The landing page ships its own full-bleed hero + nav (Originkit hero-01),
 // so it renders outside the app chrome. Every other route sits inside the
@@ -38,6 +39,14 @@ export default function App() {
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route element={<AppLayout />}>
+            <Route
+              path="/analyze"
+              element={
+                <ProtectedRoute>
+                  <FundusAnalyzer />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/database"
               element={
@@ -78,7 +87,14 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
-            <Route path="*" element={<p className="font-tight text-sm text-[#45545e]">Page not found.</p>} />
+            <Route
+              path="*"
+              element={
+                <p className="font-tight text-sm text-[#45545e]">
+                  Page not found.
+                </p>
+              }
+            />
           </Route>
         </Routes>
 

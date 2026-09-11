@@ -16,8 +16,8 @@ export default defineConfig({
     // Proxy API calls to the Node/Express backend (../backend) during dev.
     // Update the target if the backend runs on a different port.
     proxy: {
-      "/api": "http://localhost:5000",
-      "/uploads": "http://localhost:5000"
+      "/api": "http://localhost:5001",
+      "/uploads": "http://localhost:5001"
     }
   }
 });
