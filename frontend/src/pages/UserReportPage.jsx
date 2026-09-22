@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import { useApp } from "../context/AppContext";
 import ReportTabs from "../components/ReportTabs";
 import AnalysisTab from "../components/tabs/AnalysisTab";
@@ -22,13 +23,13 @@ export default function UserReportPage() {
   if (!activePatient) {
     return (
       <FadeIn>
-        <section className="rounded-2xl bg-white p-6 text-center shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)]">
-          <p className="mb-4 font-tight text-sm text-[#45545e]">
+        <section className="rounded-2xl bg-white p-6 text-center border border-black/[0.06] shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+          <p className="mb-4 font-ui text-sm text-[#45545e]">
             No patient selected. Go to the Database page and choose a patient.
           </p>
           <button
             onClick={() => navigate("/database")}
-            className="rounded-full bg-[#111318] px-4 py-2 font-tight text-sm font-semibold text-white transition hover:bg-black"
+            className="rounded-full bg-[#111318] px-4 py-2 font-ui text-sm font-semibold text-white transition hover:bg-black"
           >
             Back to Database
           </button>
@@ -66,20 +67,20 @@ export default function UserReportPage() {
   return (
     <FadeIn>
       <section>
-        <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-white p-4 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)]">
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-white p-4 border border-black/[0.06] shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
           <div>
-            <span className="rounded-full bg-[#efeff0] px-2 py-0.5 font-tight text-xs font-semibold text-[#010110]">
+            <span className="rounded-full bg-[#efeff0] px-2 py-0.5 font-ui text-xs font-semibold text-[#010110]">
               ACTIVE USER REPORT
             </span>
-            <h2 className="mt-1 font-helvetica-neue text-lg font-medium text-[#010110]">
+            <h2 className="mt-1 font-display text-lg font-medium text-[#010110]">
               {activePatient.name} (ID: {activePatient.id})
             </h2>
           </div>
           <button
             onClick={() => navigate("/database")}
-            className="rounded-full border border-black/15 px-4 py-2 font-tight text-sm font-medium text-[#242424] transition hover:bg-[#f5f5f2]"
+            className="flex items-center gap-1.5 rounded-full border border-black/15 px-4 py-2 font-ui text-sm font-medium text-[#242424] transition hover:bg-[#f5f5f2]"
           >
-            &larr; Back to Database
+            <ArrowLeftIcon className="size-4" /> Back to Database
           </button>
         </div>
 
@@ -88,7 +89,7 @@ export default function UserReportPage() {
         {activeTab === "analysis" && (
           <>
             {uploadError && (
-              <p className="mb-3 font-tight text-sm font-medium text-red-600">
+              <p className="mb-3 font-ui text-sm font-medium text-red-600">
                 {uploadError}
               </p>
             )}

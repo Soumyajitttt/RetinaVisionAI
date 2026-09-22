@@ -23,10 +23,19 @@ const DEMO_ANALYSIS = {
   "P-1028": { status: "enhanced", grade: 4, confidence: 0.979, maCount: 21, hemCount: 6, exudateCount: 5, quality: { fieldQualityScore: 92, illumination: "Acceptable", macularCentering: "Valid" }, recommendation: "Urgent referral required. Risk of severe vision loss without immediate intervention." }
 };
 
+// email is each specialist's referral inbox (see src/utils/mailer.js). These
+// are placeholder addresses - real referral emails are redirected to
+// DEMO_REFERRAL_EMAIL in backend/.env until specialists have verified
+// inboxes of their own.
+//
+// location is a real lat/lng near Rampur, UP (the demo PHC's home turf) so
+// GET /api/specialists?lat=&lng= has real geometry to compute live
+// distances against. These 3 are the ONLY specialists with a fixed seed
+// location - every doctor who self-registers gets their own real one.
 const DEMO_SPECIALISTS = [
-  { specialistId: "SP-01", name: "Dr. Amit Sharma", role: "Ophthalmologist", facility: "District Civil Hospital", distanceKm: 12 },
-  { specialistId: "SP-02", name: "Dr. Priya Roy", role: "Vitreoretinal Specialist", facility: "Apex Eye Institute", distanceKm: 28 },
-  { specialistId: "SP-03", name: "Dr. V. K. Murthy", role: "Retina Surgeon", facility: "AIIMS Tele-Retina Hub", distanceKm: 45 }
+  { specialistId: "SP-01", name: "Dr. Amit Sharma", role: "Ophthalmologist", facility: "District Civil Hospital", distanceKm: 12, email: "amit.sharma@districthospital.example.in", location: { lat: 28.9167, lng: 79.0667 }, locationLabel: "Rampur, Uttar Pradesh, India" },
+  { specialistId: "SP-02", name: "Dr. Priya Roy", role: "Vitreoretinal Specialist", facility: "Apex Eye Institute", distanceKm: 28, email: "priya.roy@apexeye.example.in", location: { lat: 29.0500, lng: 79.2000 }, locationLabel: "Haldwani, Uttarakhand, India" },
+  { specialistId: "SP-03", name: "Dr. V. K. Murthy", role: "Retina Surgeon", facility: "AIIMS Tele-Retina Hub", distanceKm: 45, email: "vk.murthy@aiims.example.in", location: { lat: 29.2167, lng: 79.4167 }, locationLabel: "Almora, Uttarakhand, India" }
 ];
 
 const DEMO_USER = {
@@ -34,7 +43,8 @@ const DEMO_USER = {
   name: "Dr. Kavita Singh",
   email: "kavita.singh@rampur-phc.example.in",
   facility: "Rampur PHC Center",
-  password: "password123"
+  password: "password123",
+  role: "phc"
 };
 
 async function seedIfEmpty() {
@@ -44,6 +54,7 @@ async function seedIfEmpty() {
       name: DEMO_USER.name,
       email: DEMO_USER.email,
       facility: DEMO_USER.facility,
+      role: DEMO_USER.role,
       passwordHash: await User.hashPassword(DEMO_USER.password)
     });
     console.log(

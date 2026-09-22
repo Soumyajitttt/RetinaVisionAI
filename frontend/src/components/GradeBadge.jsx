@@ -12,7 +12,7 @@ const GRADE_STYLES = {
 export default function GradeBadge({ grade, gradeText }) {
   const styles = GRADE_STYLES[grade] ?? "bg-[#f0f0ee] text-[#45545e]";
   return (
-    <span className={`inline-flex items-center rounded-full px-3 py-1 font-tight text-xs font-semibold ${styles}`}>
+    <span className={`inline-flex items-center rounded-full px-3 py-1 font-ui text-xs font-semibold ${styles}`}>
       {gradeText}
     </span>
   );

@@ -1,4 +1,10 @@
 @import url("https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Tillana:wght@400;500;600;700&family=Inter+Tight:wght@400;500;600&display=swap");
+/*
+ * App-shell typography (dashboard pages/components only). Kept as a
+ * separate import + separate theme tokens so the landing page's Originkit
+ * fonts/tokens above are completely untouched.
+ */
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap");
 @import "tailwindcss";
 
 /*
@@ -12,6 +18,11 @@
   --font-tillana: Tillana, cursive;
   --font-tight: "Inter Tight", Inter, sans-serif;
   --font-helvetica-neue: "Helvetica Neue", Helvetica, Arial, sans-serif;
+
+  /* App shell only (sidebar/topbar/pages/cards/modals) - landing page keeps
+     the tokens above untouched. */
+  --font-display: "Space Grotesk", "Inter Tight", Inter, sans-serif;
+  --font-ui: "Manrope", Inter, sans-serif;
 
   --animate-trusted-marquee: trusted-marquee 36s linear infinite;
   --animate-hero-reveal: hero-reveal 300ms cubic-bezier(0.215, 0.61, 0.355, 1) both;
@@ -97,6 +108,13 @@
       transform: none;
     }
   }
+}
+
+html,
+body {
+  cursor: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBmaWxsPSIjRkZGIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMiIgZD0iTTUuNSAzLjIxVjIwLjhjMCAuNDUuNTQuNjcuODUuMzVsNC44Ni00Ljg2YS41LjUgMCAwIDEgLjM1LS4xNWg2Ljg3YS41LjUgMCAwIDAgLjM1LS44NUw2LjM1IDIuODVhLjUuNSAwIDAgMC0uODUuMzVaIj48L3BhdGg+PC9zdmc+")
+      0 0,
+    auto;
 }
 
 body {

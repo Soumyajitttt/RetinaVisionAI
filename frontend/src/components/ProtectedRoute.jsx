@@ -12,13 +12,13 @@ export default function ProtectedRoute({ children }) {
   }, [checkingSession, isAuthenticated]);
 
   if (checkingSession) {
-    return <p className="p-6 font-tight text-sm text-[#45545e]">Checking session...</p>;
+    return <p className="p-6 font-ui text-sm text-[#45545e]">Checking session...</p>;
   }
 
   if (!isAuthenticated) {
     return (
-      <div className="rounded-2xl bg-white p-6 text-center shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)]">
-        <p className="font-tight text-sm text-[#45545e]">You need to log in to view this page.</p>
+      <div className="rounded-2xl bg-white p-6 text-center border border-black/6 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+        <p className="font-ui text-sm text-[#45545e]">You need to log in to view this page.</p>
       </div>
     );
   }

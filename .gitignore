@@ -148,3 +148,6 @@ dist
 # End of https://www.toptal.com/developers/gitignore/api/node 
 
 models/drNet.mat
+webapp/.DS_Store
+**/.DS_Store
+Report.pdf

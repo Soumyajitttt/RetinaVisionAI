@@ -3,6 +3,7 @@ import { useAuth } from "./AuthContext";
 import * as patientsApi from "../api/patients";
 import * as analysisApi from "../api/analysis";
 import * as specialistsApi from "../api/specialists";
+import { getCurrentPosition } from "../utils/geolocation";
 
 const AppContext = createContext(null);
 
@@ -15,7 +16,12 @@ export const GRADE_LABELS = {
 };
 
 export function AppProvider({ children }) {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
+  // Doctor accounts have no access to /api/patients, /api/analysis or
+  // /api/specialists (see backend/src/routes/index.js) - their entire view
+  // of patient data comes from GET /api/referrals/mine (see
+  // pages/DoctorInboxPage.jsx), which doesn't go through this context.
+  const isPhc = isAuthenticated && user?.role !== "doctor";
 
   const [patients, setPatients] = useState([]);
   const [patientsLoading, setPatientsLoading] = useState(false);
@@ -46,9 +52,9 @@ export function AppProvider({ children }) {
     }
   }
 
-  // Load patients + specialists once logged in.
+  // Load patients + specialists once logged in - PHC role only.
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (!isPhc) {
       setPatients([]);
       setSpecialists([]);
       setActivePatientId(null);
@@ -56,13 +62,19 @@ export function AppProvider({ children }) {
       return;
     }
     refreshPatients();
-    specialistsApi.getSpecialists().then(setSpecialists).catch(() => setSpecialists([]));
+    // Try the browser's geolocation first so specialists are sorted by real
+    // distance; getCurrentPosition() resolves to null (never rejects) if
+    // it's unavailable or denied, in which case the backend just falls
+    // back to each specialist's static distanceKm.
+    getCurrentPosition().then((coords) => {
+      specialistsApi.getSpecialists(coords).then(setSpecialists).catch(() => setSpecialists([]));
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAuthenticated]);
+  }, [isPhc]);
 
   // Fetch the analysis result whenever the active patient changes.
   useEffect(() => {
-    if (!isAuthenticated || !activePatientId) {
+    if (!isPhc || !activePatientId) {
       setActiveAnalysis(null);
       return;
     }
@@ -72,7 +84,7 @@ export function AppProvider({ children }) {
       .then(setActiveAnalysis)
       .catch(() => setActiveAnalysis(null))
       .finally(() => setAnalysisLoading(false));
-  }, [isAuthenticated, activePatientId]);
+  }, [isPhc, activePatientId]);
 
   async function addPatient({ name, age, gender, village }) {
     const newPatient = await patientsApi.createPatient({ name, age, gender, village });

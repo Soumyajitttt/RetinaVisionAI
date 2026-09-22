@@ -6,6 +6,7 @@ const { labelForGrade } = require("../utils/gradeLabels");
 const { runMatlabPipeline } = require("../utils/runMatlabPipeline");
 const asyncHandler = require("../utils/asyncHandler");
 const { quickFundusCheck } = require("../utils/quickFundusCheck");
+const { uploadToCloud, cleanupJobDir, isCloudEnabled } = require("../utils/cloudstorage");
 
 // GET /api/analysis/:patientId
 const getAnalysisForPatient = asyncHandler(async (req, res) => {
@@ -67,6 +68,13 @@ const uploadAndAnalyze = asyncHandler(async (req, res) => {
       },
       { upsert: true, new: true, setDefaultsOnInsert: true },
     );
+
+    // Rejected images are never shown anywhere, so nothing in this job
+    // folder is worth keeping - multer already wrote the upload to disk
+    // before quickFundusCheck ran. Without this, every junk upload would
+    // permanently leak a folder.
+    cleanupJobDir(jobDir);
+
     return res.json(saved);
   }
 
@@ -84,18 +92,34 @@ const uploadAndAnalyze = asyncHandler(async (req, res) => {
       raw.grade != null ? labelForGrade(raw.grade) : "Awaiting analysis",
   };
 
+  // Push MATLAB's output images to Cloudinary and store the public URL,
+  // so the local copy becomes disposable. Falls back to the old local
+  // `/uploads/...` path when Cloudinary isn't configured.
+  //
+  // IMPORTANT: this always runs for every image that exists on disk - it
+  // does NOT check "does resultDoc[key] already have a value" first.
+  // MATLAB's result.json (spread into resultDoc via `...raw` above)
+  // ALWAYS already contains a local-path gradcam_url/enhanced_url of its
+  // own, since runPipelineForWeb.m has no concept of Cloudinary and just
+  // writes where it saved the file on disk. A "skip if already set" guard
+  // here means "skip forever" for every real MATLAB run - which is
+  // exactly why uploads were silently never happening. MATLAB's local
+  // path is only ever a starting point to overwrite, never a finished
+  // answer.
+  let allUploaded = true;
   for (const [fname, key] of [
     ["gradcam.png", "gradcam_url"],
     ["enhanced.png", "enhanced_url"],
   ]) {
-    if (!resultDoc[key]) {
-      const filePath = path.join(jobDir, fname);
-      try {
-        fs.accessSync(filePath);
-        resultDoc[key] = `/uploads/${jobId}/${fname}`;
-      } catch {
-        // file doesn't exist, leave as-is
-      }
+    const filePath = path.join(jobDir, fname);
+    if (!fs.existsSync(filePath)) continue;
+
+    const cloudUrl = await uploadToCloud(filePath, jobId);
+    if (cloudUrl) {
+      resultDoc[key] = cloudUrl;
+    } else {
+      resultDoc[key] = `/uploads/${jobId}/${fname}`;
+      allUploaded = false;
     }
   }
 
@@ -109,6 +133,13 @@ const uploadAndAnalyze = asyncHandler(async (req, res) => {
     },
     { upsert: true, new: true, setDefaultsOnInsert: true },
   );
+
+  // Only safe to delete once everything the saved document points at
+  // actually lives in the cloud. If any upload fell back to a local path,
+  // deleting the folder would leave the frontend with broken images.
+  if (isCloudEnabled() && allUploaded) {
+    cleanupJobDir(jobDir);
+  }
 
   res.json(saved);
 });

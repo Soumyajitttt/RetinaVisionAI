@@ -11,11 +11,14 @@ const patientSchema = new mongoose.Schema(
     gender: { type: String, required: true },
     village: { type: String, default: "Unassigned PHC Center" },
     screenDate: { type: String, required: true },
-    grade: { type: Number, min: 0, max: 4, default: 1 },
+    // No default grade — a patient is "not analysed" until an AnalysisResult
+    // exists for them (see patientController's getPatients/getPatientById,
+    // which merge the real grade in from the AnalysisResult schema).
+    grade: { type: Number, min: 0, max: 4, default: null },
     gradeText: { type: String },
-    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" }
+    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 patientSchema.pre("validate", function setGradeText(next) {
@@ -33,7 +36,7 @@ patientSchema.set("toJSON", {
     delete ret.__v;
     delete ret.createdBy;
     return ret;
-  }
+  },
 });
 
 module.exports = mongoose.model("Patient", patientSchema);

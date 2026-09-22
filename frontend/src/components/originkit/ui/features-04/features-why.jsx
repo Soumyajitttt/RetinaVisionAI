@@ -37,7 +37,7 @@ const AVATARS = [
 const FEATURES = {
   focus: {
     title: "Scanning",
-    body: "Keep every project organized, reduce distractions, and help your team stay aligned on what matters most.",
+    body: "Screening patients. RetinaVision AI handles the rest, from image enhancement to report generation.",
     art: {
       src: asset("focus.png"),
       alt: "An isometric cube rendered in ASCII characters",
@@ -48,7 +48,7 @@ const FEATURES = {
   },
   connect: {
     title: "Analysis",
-    body: "Integrate with your favorite tools to create a connected workspace without changing how your team works.",
+    body: "From image enhancement to report generation, RetinaVision AI connects every step of the screening workflow.",
     art: {
       src: asset("connect.png"),
       alt: "Interlocking isometric blocks rendered in ASCII characters",
@@ -59,7 +59,7 @@ const FEATURES = {
   },
   scale: {
     title: "Report Generation",
-    body: "From startups to enterprise teams, AstraCore grows with your business while keeping every workflow simple.",
+    body: "RetinaVision AI generates a comprehensive report for every patient, enabling clinics to scale screening with confidence.",
     art: {
       src: asset("scale.png"),
       alt: "A rising staircase of isometric blocks rendered in ASCII characters",
@@ -135,7 +135,7 @@ export const FeaturesWhy = () => (
                     ))}
                   </div>
                   <p className="w-[154px] font-tight text-[16px] leading-[1.2] font-medium text-black desktop-sm:w-auto desktop-sm:text-[18px] desktop-sm:whitespace-nowrap">
-                    Trusted by 5,000+ Teams
+                    Trusted by Ophthalmologists
                   </p>
                 </Plate>
               </ScrollReveal>

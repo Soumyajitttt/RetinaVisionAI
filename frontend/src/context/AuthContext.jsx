@@ -1,10 +1,12 @@
 import { createContext, useContext, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import * as authApi from "../api/auth";
 import { getToken, setToken as persistToken, clearToken } from "../api/client";
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
+  const navigate = useNavigate();
   const [token, setTokenState] = useState(() => getToken());
   const [user, setUser] = useState(null);
   const [checkingSession, setCheckingSession] = useState(true);
@@ -35,6 +37,8 @@ export function AuthProvider({ children }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Returns the logged-in user object on success (so callers can route by
+  // user.role) or null on failure - previously returned a bare boolean.
   async function login(clinicianId, password) {
     setAuthError("");
     try {
@@ -43,13 +47,15 @@ export function AuthProvider({ children }) {
       setTokenState(newToken);
       setUser(loggedInUser);
       setAuthModalOpen(false);
-      return true;
+      return loggedInUser;
     } catch (err) {
       setAuthError(err.message || "Login failed");
-      return false;
+      return null;
     }
   }
 
+  // Returns the new user object on success (so callers can route by
+  // user.role) or null on failure - previously returned a bare boolean.
   async function register(details) {
     setAuthError("");
     try {
@@ -58,10 +64,10 @@ export function AuthProvider({ children }) {
       setTokenState(newToken);
       setUser(newUser);
       setAuthModalOpen(false);
-      return true;
+      return newUser;
     } catch (err) {
       setAuthError(err.message || "Registration failed");
-      return false;
+      return null;
     }
   }
 
@@ -69,6 +75,8 @@ export function AuthProvider({ children }) {
     clearToken();
     setTokenState(null);
     setUser(null);
+    // Send the user back to the public landing page after logging out.
+    navigate("/", { replace: true });
   }
 
   function openAuthModal(mode = "login") {

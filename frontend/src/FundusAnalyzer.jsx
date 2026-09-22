@@ -1,5 +1,18 @@
 import { useState } from 'react';
 
+const API_BASE = 'http://localhost:5001';
+
+// Image URLs from the backend are now absolute Cloudinary links
+// (https://res.cloudinary.com/...) once CLOUDINARY_* is configured, but
+// fall back to relative "/uploads/..." paths when it isn't. Blindly
+// prefixing API_BASE would turn a cloud URL into
+// "http://localhost:5001https://res.cloudinary.com/..." and break the
+// image, so only prefix the relative ones.
+function resolveImageUrl(url) {
+  if (!url) return null;
+  return /^https?:\/\//i.test(url) ? url : `${API_BASE}${url}`;
+}
+
 export default function FundusAnalyzer() {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -17,7 +30,7 @@ export default function FundusAnalyzer() {
     formData.append('image', file);
 
     try {
-      const res = await fetch('http://localhost:5001/api/analyze', {
+      const res = await fetch(`${API_BASE}/api/analyze`, {
         method: 'POST',
         body: formData,
       });
@@ -61,7 +74,7 @@ export default function FundusAnalyzer() {
             <div>
               <p className="text-xs text-gray-400">Grad-CAM</p>
               <img 
-                src={`http://localhost:5001${result.gradcam_url}`} 
+                src={resolveImageUrl(result.gradcam_url)} 
                 alt="Grad-CAM" 
                 className="w-full rounded"
               />
@@ -69,7 +82,7 @@ export default function FundusAnalyzer() {
             <div>
               <p className="text-xs text-gray-400">Enhanced</p>
               <img 
-                src={`http://localhost:5001${result.enhanced_url}`} 
+                src={resolveImageUrl(result.enhanced_url)} 
                 alt="Enhanced" 
                 className="w-full rounded"
               />
