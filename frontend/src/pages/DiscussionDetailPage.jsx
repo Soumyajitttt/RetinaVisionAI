@@ -6,6 +6,7 @@ import FadeIn from "../components/FadeIn";
 import PatientReportCard from "../components/PatientReportCard";
 import { useAuth } from "../context/AuthContext";
 import { useDiscussionNotifications } from "../context/DiscussionNotificationsContext";
+import { usePageHeader } from "../context/PageHeaderContext";
 import * as discussionsApi from "../api/discussions";
 import { getToken } from "../api/client";
 
@@ -48,6 +49,7 @@ export default function DiscussionDetailPage() {
   // driven by this shared context's own state - clear it here too so it
   // doesn't wait for a fresh fetch to catch up.
   const { markRead: markReadLocally } = useDiscussionNotifications();
+  const { setTitle: setHeaderTitle, setAction } = usePageHeader();
 
   const [discussion, setDiscussion] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -139,6 +141,47 @@ export default function DiscussionDetailPage() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [discussion?.comments?.length]);
 
+  // Swaps Topbar's default "Discussion" MAIN HEADER for this thread's own
+  // "Re: <patient> · with <doctor>" line while this page is open, and puts
+  // the default back the moment it isn't (route change or unmount) - see
+  // PageHeaderContext. Derived as a plain string (not read straight off
+  // `discussion` in the effect) so re-running the effect on every new
+  // comment - which produces a new `discussion` object but the same
+  // patient/doctor names - doesn't reset-then-reset Topbar's text on every
+  // message.
+  const headerTitle = discussion
+    ? `${discussion.startedBy === user?.id ? "To" : "From"} 
+      ${
+        discussion.startedBy === user?.id
+          ? discussion.invitedDoctorName
+          : discussion.startedByName
+      }`
+    : null;
+
+  useEffect(() => {
+    if (!headerTitle) return undefined;
+    setHeaderTitle(headerTitle);
+    return () => setHeaderTitle(null);
+  }, [headerTitle, setHeaderTitle]);
+
+  // "Start Video Call" now lives in Topbar's top-right corner (see
+  // PageHeaderContext/Topbar) instead of inline in the card below, so it's
+  // set here the same way headerTitle is, and cleared again on unmount.
+  useEffect(() => {
+    if (!discussion) return undefined;
+    setAction(
+      <a
+        href={videoRoomUrl(discussion.id)}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex shrink-0 items-center gap-1.5 rounded-full bg-[#111318] px-4 py-2 font-ui text-sm font-semibold text-white transition hover:bg-black"
+      >
+        Start Video Call
+      </a>
+    );
+    return () => setAction(null);
+  }, [discussion, setAction]);
+
   function handleTextChange(e) {
     setText(e.target.value);
     const socket = socketRef.current;
@@ -195,50 +238,29 @@ export default function DiscussionDetailPage() {
     );
   }
 
-  const otherDoctor = discussion.startedBy === user?.id ? discussion.invitedDoctorName : discussion.startedByName;
-
   return (
     <FadeIn>
       <section>
         <button
           onClick={() => navigate("/discussions")}
-          className="mb-4 flex items-center gap-1.5 font-ui text-sm font-medium text-[#45545e] transition hover:text-[#010110]"
+          className="mb-2.5 flex items-center gap-1.5 font-ui text-sm font-medium text-[#45545e] transition hover:text-[#010110]"
         >
           <ArrowLeftIcon className="size-4" /> Back to Discussions
         </button>
 
-        <div className="mb-5 flex items-center justify-between gap-4 rounded-2xl border border-black/[0.06] bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
-          <div>
-            <h2 className="font-display text-lg font-medium text-[#010110]">{discussion.subject}</h2>
-            <p className="font-ui text-sm text-[#45545e]">
-              Re: <strong>{discussion.patientName}</strong> ({discussion.patientId}) &middot; with{" "}
-              {otherDoctor}
-            </p>
-          </div>
-          <a
-            href={videoRoomUrl(discussion.id)}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex shrink-0 items-center gap-1.5 rounded-full bg-[#111318] px-4 py-2 font-ui text-sm font-semibold text-white transition hover:bg-black"
-          >
-            Start Video Call
-          </a>
-        </div>
-        {/* <p className="-mt-3 mb-5 font-ui text-xs text-[#8a8f98]">
-          Opens a video room just for this discussion &mdash; share this page with {otherDoctor} and
-          they can join the same call from their own "Start Video Call" button.
-        </p> */}
-
-        {/* The actual report the discussion is about - embedded by the
-            backend on every GET/POST to this discussion. */}
+        {/* One unified card, now a single row: the subject text doubles as
+            the row's title (no separate "Patient Report" label sitting
+            right under it), and the whole row toggles the report below -
+            the right-hand control now reads "View/Hide Patient Report" so
+            it's still clear what it opens. */}
         <div className="mb-5 overflow-hidden rounded-2xl border border-black/[0.06] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
           <button
             onClick={() => setReportOpen((o) => !o)}
-            className="flex w-full items-center justify-between px-5 py-4 text-left transition hover:bg-[#f8f8f8]"
+            className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition hover:bg-[#f8f8f8]"
           >
-            <h3 className="font-display text-base font-medium text-[#010110]">Patient Report</h3>
-            <span className="flex items-center gap-1 font-ui text-sm text-[#8a8f98]">
-              {reportOpen ? "Hide" : "View"}
+            <h2 className="font-display text-lg font-medium text-[#010110]">{discussion.subject}</h2>
+            <span className="flex shrink-0 items-center gap-1 font-ui text-sm text-[#8a8f98]">
+              {reportOpen ? "Hide Patient Report" : "View Patient Report"}
               {reportOpen ? <ChevronUpIcon className="size-4" /> : <ChevronDownIcon className="size-4" />}
             </span>
           </button>
@@ -249,53 +271,62 @@ export default function DiscussionDetailPage() {
           )}
         </div>
 
-        <div className="mb-4 max-h-[55vh] space-y-3 overflow-y-auto rounded-2xl border border-black/[0.06] bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
-          {discussion.comments.length === 0 && (
-            <p className="font-ui text-sm text-[#8a8f98]">
-              No replies yet - be the first to respond below.
-            </p>
-          )}
-          {discussion.comments.map((c) => {
-            const isMine = c.authorId === user?.id;
-            return (
-              <div key={c.id} className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
-                <div
-                  className={`max-w-[75%] rounded-2xl px-4 py-2.5 ${
-                    isMine ? "bg-[#111318] text-white" : "bg-[#f0f0ee] text-[#010110]"
-                  }`}
-                >
-                  <p className={`mb-0.5 font-ui text-xs font-semibold ${isMine ? "text-white/60" : "text-[#45545e]"}`}>
-                    {isMine ? "You" : c.authorName} &middot; {formatDateTime(c.createdAt)}
-                  </p>
-                  <p className="font-ui text-sm leading-relaxed">{c.text}</p>
+        {/* Chat + composer grouped into one card (previously a scrolling
+            message list, error/typing lines, and the reply form each sat as
+            separate elements) - the message area also gets a deeper
+            background than plain white so it reads as its own "conversation
+            surface" distinct from the composer bar beneath it. */}
+        <div className="mb-4 overflow-hidden rounded-2xl border border-black/[0.06] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+          <div className="max-h-[55vh] space-y-3 overflow-y-auto bg-[#eef0f2] p-5">
+            {discussion.comments.length === 0 && (
+              <p className="font-ui text-sm text-[#8a8f98]">
+                No replies yet - be the first to respond below.
+              </p>
+            )}
+            {discussion.comments.map((c) => {
+              const isMine = c.authorId === user?.id;
+              return (
+                <div key={c.id} className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
+                  <div
+                    className={`max-w-[75%] rounded-2xl px-4 py-2.5 ${
+                      isMine ? "bg-[#111318] text-white" : "bg-white text-[#010110]"
+                    }`}
+                  >
+                    <p className={`mb-0.5 font-ui text-xs font-semibold ${isMine ? "text-white/60" : "text-[#45545e]"}`}>
+                      {isMine ? "You" : c.authorName} &middot; {formatDateTime(c.createdAt)}
+                    </p>
+                    <p className="font-ui text-sm leading-relaxed">{c.text}</p>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-          <div ref={bottomRef} />
+              );
+            })}
+            <div ref={bottomRef} />
+          </div>
+
+          <div className="border-t border-black/[0.06] p-4">
+            {error && <p className="mb-2 font-ui text-sm text-red-600">{error}</p>}
+            {typingName && (
+              <p className="mb-2 font-ui text-xs italic text-[#8a8f98]">{typingName} is typing&hellip;</p>
+            )}
+
+            <form onSubmit={handlePost} className="flex gap-2">
+              <input
+                type="text"
+                value={text}
+                onChange={handleTextChange}
+                placeholder="Write a reply..."
+                className="flex-1 rounded-xl border border-black/10 bg-white px-3 py-2 font-ui text-sm text-[#010110] placeholder:text-[#8a8f98] focus:border-[#010110] focus:outline-none focus:ring-1 focus:ring-[#010110]/15"
+              />
+              <button
+                type="submit"
+                disabled={posting || !text.trim()}
+                className="rounded-full bg-[#111318] px-5 py-2 font-ui text-sm font-semibold text-white transition hover:bg-black disabled:opacity-60"
+              >
+                {posting ? "Posting..." : "Post"}
+              </button>
+            </form>
+          </div>
         </div>
-
-        {error && <p className="mb-2 font-ui text-sm text-red-600">{error}</p>}
-        {typingName && (
-          <p className="mb-2 font-ui text-xs italic text-[#8a8f98]">{typingName} is typing&hellip;</p>
-        )}
-
-        <form onSubmit={handlePost} className="flex gap-2">
-          <input
-            type="text"
-            value={text}
-            onChange={handleTextChange}
-            placeholder="Write a reply..."
-            className="flex-1 rounded-xl border border-black/10 bg-white px-3 py-2 font-ui text-sm text-[#010110] placeholder:text-[#8a8f98] focus:border-[#010110] focus:outline-none focus:ring-1 focus:ring-[#010110]/15"
-          />
-          <button
-            type="submit"
-            disabled={posting || !text.trim()}
-            className="rounded-full bg-[#111318] px-5 py-2 font-ui text-sm font-semibold text-white transition hover:bg-black disabled:opacity-60"
-          >
-            {posting ? "Posting..." : "Post"}
-          </button>
-        </form>
       </section>
     </FadeIn>
   );

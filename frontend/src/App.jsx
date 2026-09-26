@@ -2,6 +2,7 @@ import { Routes, Route, Outlet } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { AppProvider } from "./context/AppContext";
 import { DiscussionNotificationsProvider } from "./context/DiscussionNotificationsContext";
+import { PageHeaderProvider } from "./context/PageHeaderContext";
 import Sidebar from "./components/Sidebar";
 import Topbar from "./components/Topbar";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -66,6 +67,7 @@ export default function App() {
     <AuthProvider>
       <DiscussionNotificationsProvider>
         <AppProvider>
+          <PageHeaderProvider>
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route element={<AppLayout />}>
@@ -163,6 +165,7 @@ export default function App() {
           {/* Rendered globally (not inside Header) so the Landing page's own
               hero nav can trigger it too - see hero-01-content.jsx's Login button. */}
           <AuthModal />
+          </PageHeaderProvider>
         </AppProvider>
       </DiscussionNotificationsProvider>
     </AuthProvider>

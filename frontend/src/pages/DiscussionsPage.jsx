@@ -114,7 +114,7 @@ export default function DiscussionsPage() {
                   </h3>
                 </div>
                 <p className="font-ui text-sm text-[#45545e]">
-                  {d.patientName} ({d.patientId}) &middot; {youStarted ? "with" : "invited by"}{" "}
+                  {d.patientName} ({d.patientId}) &middot; {youStarted ? "to" : "from"}{" "}
                   {otherDoctor}
                 </p>
               </div>
