@@ -158,21 +158,34 @@ export default function ResultsTab({
           Detection Summary
         </h3>
 
-        <div className="mb-5 rounded-xl bg-[#f8f8f8] px-4 py-3.5">
-          <p className="font-ui text-xs font-medium uppercase tracking-wide text-[#8a8f98]">
-            Confidence Level
-          </p>
-          <p
-            className={`mt-1 font-display text-[26px] leading-none ${
-              analysis.confidence != null && analysis.confidence * 100 > 90
-                ? "font-bold text-[#0d7a2e]"
-                : "font-semibold text-[#a50303]"
-            }`}
-          >
-            {analysis.confidence != null
-              ? `${(analysis.confidence * 100).toFixed(1)}%`
-              : "N/A"}
-          </p>
+        <div className="mb-5 grid grid-cols-2 gap-3">
+          <div className="rounded-xl bg-[#f8f8f8] px-4 py-3.5">
+            <p className="font-ui text-xs font-medium uppercase tracking-wide text-[#8a8f98]">
+              Confidence Level
+            </p>
+            <p
+              className={`mt-1 font-display text-[26px] leading-none ${
+                analysis.confidence != null && analysis.confidence * 100 > 90
+                  ? "font-bold text-[#0d7a2e]"
+                  : "font-semibold text-[#a50303]"
+              }`}
+            >
+              {analysis.confidence != null
+                ? `${(analysis.confidence * 100).toFixed(1)}%`
+                : "N/A"}
+            </p>
+          </div>
+
+          <div className="rounded-xl bg-[#f8f8f8] px-4 py-3.5">
+            <p className="font-ui text-xs font-medium uppercase tracking-wide text-[#8a8f98]">
+              Lesion Overlap
+            </p>
+            <p className="mt-1 font-display text-[26px] font-bold leading-none text-[#010110]">
+              {analysis.lesionOverlap != null
+                ? `${(analysis.lesionOverlap * 100).toFixed(1)}%`
+                : "N/A"}
+            </p>
+          </div>
         </div>
 
         <p className="mb-2 font-ui text-xs font-medium uppercase tracking-wide text-[#8a8f98]">

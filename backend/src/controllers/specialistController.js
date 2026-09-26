@@ -4,7 +4,7 @@ const AnalysisResult = require("../models/AnalysisResult");
 const Referral = require("../models/Referral");
 const asyncHandler = require("../utils/asyncHandler");
 const { sendMail } = require("../utils/mailer");
-const { generateReportPdfBuffer } = require("../utils/generateReportPdf");
+const { generateReportHtml } = require("../utils/generateReportHtml");
 const { haversineKm } = require("../utils/geo");
 const config = require("../config/env");
 
@@ -69,7 +69,7 @@ const sendReferral = asyncHandler(async (req, res) => {
     emailError = "No recipient email configured for this specialist";
   } else {
     try {
-      const pdfBuffer = await generateReportPdfBuffer({ patient, analysis, specialist });
+      const reportHtml = generateReportHtml({ patient, analysis, specialist });
       await sendMail({
         to: recipient,
         subject: `Referral: ${patient.name} (${patient.patientId}) - ${analysis.gradeText || "DR Screening"}`,
@@ -78,16 +78,13 @@ const sendReferral = asyncHandler(async (req, res) => {
           `A new patient referral has been sent from RetinaVision AI.\n\n` +
           `Patient: ${patient.name} (${patient.patientId})\n` +
           `Grading result: ${analysis.gradeText || "N/A"}\n\n` +
-          `The full screening report is attached as a PDF, and is also visible ` +
+          `The full screening report is below, and is also visible ` +
           `in your RetinaVision AI dashboard under "My Patients".\n\n` +
           `- RetinaVision AI (automated message)`,
-        attachments: [
-          {
-            filename: `${patient.patientId}-report.pdf`,
-            content: pdfBuffer,
-            contentType: "application/pdf"
-          }
-        ]
+        // The report itself, as the email body - not a PDF/file attachment.
+        // See generateReportHtml.js for why (email-client-safe inline
+        // styles, remote Cloudinary <img> URLs instead of fetched buffers).
+        html: reportHtml
       });
       emailStatus = "sent";
     } catch (err) {

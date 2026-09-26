@@ -7,6 +7,12 @@ const analysisResultSchema = new mongoose.Schema(
     grade: { type: Number },
     gradeText: { type: String },
     confidence: { type: Number },
+    // Fraction (0-1, same convention as `confidence`) of detected lesion
+    // area that falls inside the model's Grad-CAM attention region - i.e.
+    // how much the "where the lesions are" and "where the model looked"
+    // maps agree. Shown as a percentage next to Confidence Level on the
+    // Result/Grading tab and in the PDF report preview.
+    lesionOverlap: { type: Number },
     maCount: { type: Number },
     hemCount: { type: Number },
     exudateCount: { type: Number },

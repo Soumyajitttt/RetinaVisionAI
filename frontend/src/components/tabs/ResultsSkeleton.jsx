@@ -87,12 +87,21 @@ export default function ResultsSkeleton() {
           Detection Summary
         </h3>
 
-        <div className="mb-5 rounded-xl bg-[#f8f8f8] px-4 py-3.5">
-          <p className="font-ui text-xs font-medium uppercase tracking-wide text-[#8a8f98]">
-            Confidence Level
-          </p>
-          {/* Matches the real value's font-display text-[26px] line height */}
-          <Bone className="mt-1 h-[26px] w-20" />
+        <div className="mb-5 grid grid-cols-2 gap-3">
+          <div className="rounded-xl bg-[#f8f8f8] px-4 py-3.5">
+            <p className="font-ui text-xs font-medium uppercase tracking-wide text-[#8a8f98]">
+              Confidence Level
+            </p>
+            {/* Matches the real value's font-display text-[26px] line height */}
+            <Bone className="mt-1 h-[26px] w-20" />
+          </div>
+
+          <div className="rounded-xl bg-[#f8f8f8] px-4 py-3.5">
+            <p className="font-ui text-xs font-medium uppercase tracking-wide text-[#8a8f98]">
+              Lesion Overlap
+            </p>
+            <Bone className="mt-1 h-[26px] w-20" />
+          </div>
         </div>
 
         <p className="mb-2 font-ui text-xs font-medium uppercase tracking-wide text-[#8a8f98]">

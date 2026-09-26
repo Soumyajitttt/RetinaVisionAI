@@ -1,3 +1,4 @@
+import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeftIcon, ArrowRightIcon } from "@heroicons/react/24/outline";
 import { useApp } from "../context/AppContext";
@@ -17,6 +18,60 @@ const GRADE_NOTES = {
 export default function PdfReportPage() {
   const { activePatient, activeAnalysis } = useApp();
   const navigate = useNavigate();
+  const reportRef = useRef(null);
+  // NEW: window.print() used to fire the instant the button was clicked.
+  // Just waiting for each <img>'s "load" event turned out not to be
+  // enough - "loaded" isn't the same as "decoded and painted", and
+  // Chrome's print snapshot doesn't reliably wait for that last step, so
+  // the Cloudinary-hosted enhanced/gradcam/etc. images could still come
+  // out blank in the actual PDF/printout even though they were visibly on
+  // screen. The reliable fix: convert every report image to a data: URL
+  // (fetched + base64-encoded, fully in memory - no network or decode
+  // race left at print time) before calling print. Cloudinary's delivery
+  // URLs send Access-Control-Allow-Origin: *, so the fetch() below works
+  // without any extra CORS configuration.
+  const [isPreparingPrint, setIsPreparingPrint] = useState(false);
+
+  async function imageToDataUrl(src) {
+    try {
+      const res = await fetch(src, { mode: "cors" });
+      if (!res.ok) return null;
+      const blob = await res.blob();
+      return await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    } catch (err) {
+      console.error(`[PdfReportPage] Failed to inline image for printing: ${src}`, err);
+      return null;
+    }
+  }
+
+  async function inlineImages(container) {
+    const imgs = Array.from(container?.querySelectorAll("img") || []);
+    await Promise.all(
+      imgs.map(async (img) => {
+        // Already a data: URL (e.g. a re-print) - nothing to do.
+        if (img.src.startsWith("data:")) return;
+        const dataUrl = await imageToDataUrl(img.src);
+        // On failure, leave the original src in place rather than blanking
+        // it - a normal (if racy) <img> is still better than no image.
+        if (dataUrl) img.src = dataUrl;
+      })
+    );
+  }
+
+  async function handlePrint() {
+    setIsPreparingPrint(true);
+    try {
+      await inlineImages(reportRef.current);
+      window.print();
+    } finally {
+      setIsPreparingPrint(false);
+    }
+  }
 
   if (!activePatient || !activeAnalysis) {
     return (
@@ -59,15 +114,20 @@ export default function PdfReportPage() {
               <ArrowLeftIcon className="size-4" /> Edit
             </button>
             <button
-              onClick={() => window.print()}
-              className="flex items-center gap-1.5 rounded-full bg-[#111318] px-4 py-2 font-ui text-sm font-semibold text-white transition hover:bg-black"
+              onClick={handlePrint}
+              disabled={isPreparingPrint}
+              className="flex items-center gap-1.5 rounded-full bg-[#111318] px-4 py-2 font-ui text-sm font-semibold text-white transition hover:bg-black disabled:cursor-wait disabled:opacity-60"
             >
-              Download / Print PDF <ArrowRightIcon className="size-4" />
+              {isPreparingPrint ? "Preparing…" : "Download / Print PDF"}{" "}
+              <ArrowRightIcon className="size-4" />
             </button>
           </div>
         </div>
 
-        <div className="relative mx-auto max-w-3xl rounded-2xl border border-black/[0.06] bg-white p-10 shadow-[0_1px_2px_rgba(0,0,0,0.03)] print:m-0 print:max-w-none print:rounded-none print:border-none print:p-6 print:shadow-none">
+        <div
+          ref={reportRef}
+          className="relative mx-auto max-w-3xl rounded-2xl border border-black/[0.06] bg-white p-10 shadow-[0_1px_2px_rgba(0,0,0,0.03)] print:m-0 print:max-w-none print:rounded-none print:border-none print:p-6 print:shadow-none"
+        >
           <div className="mb-6 flex justify-between border-b-2 border-black/10 pb-4">
             <div>
               <h2 className="font-display text-xl font-medium text-[#010110]">
@@ -129,6 +189,11 @@ export default function PdfReportPage() {
               AI Confidence Score:{" "}
               {activeAnalysis.confidence != null
                 ? `${(activeAnalysis.confidence * 100).toFixed(1)}%`
+                : "N/A"}{" "}
+              <br />
+              Lesion Overlap:{" "}
+              {activeAnalysis.lesionOverlap != null
+                ? `${(activeAnalysis.lesionOverlap * 100).toFixed(1)}%`
                 : "N/A"}
             </p>
           </div>

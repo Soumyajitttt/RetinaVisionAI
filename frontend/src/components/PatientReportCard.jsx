@@ -60,7 +60,10 @@ export default function PatientReportCard({ patient, analysis }) {
           Intraretinal Hemorrhages: {analysis.hemCount ?? "N/A"} <br />
           Hard Exudates: {analysis.exudateCount ?? "N/A"} <br />
           AI Confidence Score:{" "}
-          {analysis.confidence != null ? `${(analysis.confidence * 100).toFixed(1)}%` : "N/A"}
+          {analysis.confidence != null ? `${(analysis.confidence * 100).toFixed(1)}%` : "N/A"}{" "}
+          <br />
+          Lesion Overlap:{" "}
+          {analysis.lesionOverlap != null ? `${(analysis.lesionOverlap * 100).toFixed(1)}%` : "N/A"}
         </p>
       </div>
 

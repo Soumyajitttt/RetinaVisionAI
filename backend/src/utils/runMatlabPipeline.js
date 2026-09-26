@@ -92,6 +92,7 @@ function mockResult() {
     score: 3,
     grade: 2,
     confidence: 0.91,
+    lesionOverlap: 0.826,
     maCount: 6,
     hemCount: 2,
     exudateCount: 1

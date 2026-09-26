@@ -44,7 +44,26 @@ function runPipelineForWeb(imagePath, outputDir)
         [predictedLabel, scores] = classify(drNet, imgResized);
         result.grade = double(string(predictedLabel));
         result.confidence = max(scores);
-        generateGradCAM(drNet, imgResized, predictedLabel, fullfile(outputDir, 'gradcam.png'), imgOut);
+        camMap = generateGradCAM(drNet, imgResized, predictedLabel, fullfile(outputDir, 'gradcam.png'), imgOut);
+
+        % --- Lesion Overlap ---
+        % What fraction of the segmented lesion area (MA + hemorrhage +
+        % exudate masks from Module 2, already computed above) falls
+        % inside the network's own high-attention region of its Grad-CAM
+        % map. High agreement means the model is actually "looking at"
+        % the lesions it's grading on, not just pattern-matching on
+        % something else in the image. camMap is already full-resolution
+        % and FOV-masked (see generateGradCAM.m), so it lines up pixel-
+        % for-pixel with the lesion masks with no extra resizing needed.
+        % Left unset (rather than 0) when no lesions were segmented at
+        % all - "0% overlap" would misleadingly read as a disagreement
+        % rather than "nothing to overlap with".
+        lesionMask = maMask | hemMask | exMask;
+        lesionArea = nnz(lesionMask);
+        if lesionArea > 0
+            attentionMask = camMap > 0.5;
+            result.lesionOverlap = nnz(lesionMask & attentionMask) / lesionArea;
+        end
     catch err
         result.status = 'error';
         result.errorMessage = err.message;
