@@ -5,7 +5,8 @@ const {
   createDiscussion,
   getMyDiscussions,
   getDiscussion,
-  addComment
+  addComment,
+  markDiscussionRead
 } = require("../controllers/discussionController");
 
 const router = express.Router();
@@ -20,5 +21,6 @@ router.get("/mine", getMyDiscussions);
 router.post("/", createDiscussion);
 router.get("/:id", getDiscussion);
 router.post("/:id/comments", addComment);
+router.post("/:id/read", markDiscussionRead);
 
 module.exports = router;

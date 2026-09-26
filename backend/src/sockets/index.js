@@ -20,6 +20,17 @@ function discussionRoom(discussionId) {
   return `discussion:${discussionId}`;
 }
 
+// One room per logged-in doctor (keyed by clinicianId), joined automatically
+// on every connection below. Unlike discussionRoom, a doctor doesn't have to
+// opt into this one by viewing a particular thread - it's how
+// discussionController.addComment tells the OTHER participant "you have an
+// unread reply" even while they're elsewhere in the app (the discussions
+// list, a different discussion, etc), not just to people currently sat in
+// that thread's room.
+function userRoom(doctorId) {
+  return `user:${doctorId}`;
+}
+
 function initSockets(io) {
   // Every socket must present the same JWT the REST API uses, passed in
   // the handshake as `auth: { token }` (never a query string, so it never
@@ -43,6 +54,10 @@ function initSockets(io) {
   });
 
   io.on("connection", (socket) => {
+    // Joined immediately (no ack needed) so unread notifications reach this
+    // doctor regardless of which page they're on.
+    socket.join(userRoom(socket.user.id));
+
     socket.on("discussion:join", async (discussionId, ack) => {
       try {
         const discussion = await Discussion.findById(discussionId);
@@ -73,4 +88,4 @@ function initSockets(io) {
   });
 }
 
-module.exports = { initSockets, discussionRoom };
+module.exports = { initSockets, discussionRoom, userRoom };
