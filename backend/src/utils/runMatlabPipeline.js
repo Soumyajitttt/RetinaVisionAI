@@ -16,7 +16,7 @@ const config = require("../config/env");
  * @returns {Promise<object>} parsed result.json contents
  */
 function runMatlabPipeline(imagePath, jobDir) {
-  const { exePath, projectRoot } = config.matlab;
+  const { exePath, projectRoot, timeoutMs } = config.matlab;
 
   if (!exePath || !projectRoot) {
     console.warn(
@@ -27,7 +27,7 @@ function runMatlabPipeline(imagePath, jobDir) {
   }
 
   const srcDir = path.join(projectRoot, "src");
-  const subfolders = ["quality", "segmentation", "classification", "explainability"];
+  const subfolders = ["quality", "segmentation", "explainability"];
   const addPaths = subfolders.map((s) => `addpath('${path.join(srcDir, s)}')`).join("; ");
 
   const matlabExpr =
@@ -35,7 +35,24 @@ function runMatlabPipeline(imagePath, jobDir) {
     `runPipelineForWeb('${imagePath}', '${jobDir}')`;
 
   return new Promise((resolve, reject) => {
-    execFile(exePath, ["-batch", matlabExpr], { timeout: 180000 }, (error, stdout, stderr) => {
+    execFile(exePath, ["-batch", matlabExpr], { timeout: timeoutMs }, (error, stdout, stderr) => {
+      // IMPORTANT: this used to only surface stdout/stderr when MATLAB
+      // exited non-zero. But runPipelineForWeb.m's explainability calls
+      // are individually wrapped in try/catch + warning() precisely so a
+      // failure there DOESN'T make MATLAB exit non-zero - the whole
+      // process still succeeds with a valid result.json, just missing
+      // multilayer.png/crossmethod.png/activations.png. Which meant those
+      // warning() messages - the only clue as to *why* - were being
+      // silently discarded on every successful run. Always log a
+      // truncated view of both streams now, regardless of outcome.
+      const preview = (s, label) => {
+        if (!s || !s.trim()) return;
+        const trimmed = s.trim();
+        console.log(`[runMatlabPipeline] MATLAB ${label}:\n${trimmed.slice(0, 4000)}`);
+      };
+      preview(stdout, "stdout");
+      preview(stderr, "stderr");
+
       if (error) {
         if (error.code === "ENOENT") {
           return reject(
@@ -43,7 +60,13 @@ function runMatlabPipeline(imagePath, jobDir) {
           );
         }
         if (error.killed) {
-          return reject(new Error("MATLAB timed out"));
+          return reject(
+            new Error(
+              `MATLAB timed out after ${Math.round(timeoutMs / 1000)}s. If this keeps happening, ` +
+                "raise MATLAB_TIMEOUT_MS in backend/.env (the explainability views - especially " +
+                "Cross-Method/LIME - add real processing time per upload)."
+            )
+          );
         }
         return reject(new Error(stderr?.trim() || stdout?.trim() || "MATLAB processing failed"));
       }

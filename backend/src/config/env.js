@@ -17,7 +17,14 @@ module.exports = {
   },
   matlab: {
     exePath: process.env.MATLAB_EXE || "",
-    projectRoot: process.env.MATLAB_PROJECT_ROOT || ""
+    projectRoot: process.env.MATLAB_PROJECT_ROOT || "",
+    // Grad-CAM + Multi-Layer CAM + Cross-Method (occlusion + LIME) +
+    // Activations all run per upload now (see runPipelineForWeb.m) -
+    // LIME especially can take minutes on its own via many perturbed
+    // forward passes, so the old 180s default was too tight. Override
+    // with MATLAB_TIMEOUT_MS in .env if 10 minutes still isn't enough on
+    // your machine.
+    timeoutMs: Number(process.env.MATLAB_TIMEOUT_MS) || 600000
   },
   // Cloudinary hosts the MATLAB-generated enhanced/Grad-CAM images so the
   // local uploads/ folder can be deleted after every job instead of

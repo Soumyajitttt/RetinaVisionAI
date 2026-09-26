@@ -80,6 +80,43 @@ const uploadAndAnalyze = asyncHandler(async (req, res) => {
 
   const raw = await runMatlabPipeline(imagePath, jobDir);
 
+  // A pipeline-level failure (e.g. runPipelineForWeb.m couldn't load
+  // models/drNet.mat) is reported as status "error" + errorMessage in
+  // result.json rather than MATLAB crashing the whole process - see the
+  // try/catch around Module 3/4 in runPipelineForWeb.m. Surface that
+  // clearly and stop here rather than falling through to the upload loop
+  // below, which has nothing to upload for a run that never classified.
+  if (raw.status === "error") {
+    const saved = await AnalysisResult.findOneAndUpdate(
+      { patientId },
+      {
+        $set: {
+          patientId,
+          status: "error",
+          errorMessage: raw.errorMessage || "Analysis pipeline failed.",
+        },
+        // Segmentation counts (maCount/hemCount/exudateCount) may have
+        // completed fine before classification failed, so those are left
+        // alone - only the classification-derived fields are cleared, so
+        // a stale grade/confidence from a previous successful run can
+        // never be shown alongside this error.
+        $unset: {
+          grade: "",
+          gradeText: "",
+          confidence: "",
+          gradcam_url: "",
+          multilayer_url: "",
+          crossmethod_url: "",
+          activations_url: "",
+          rejectReason: "",
+        },
+      },
+      { upsert: true, new: true, setDefaultsOnInsert: true },
+    );
+    cleanupJobDir(jobDir);
+    return res.json(saved);
+  }
+
   const resultDoc = {
     ...raw,
     // Always force a valid status on a successful run. Don't rely on raw
@@ -110,6 +147,17 @@ const uploadAndAnalyze = asyncHandler(async (req, res) => {
   for (const [fname, key] of [
     ["gradcam.png", "gradcam_url"],
     ["enhanced.png", "enhanced_url"],
+    // Written by generateMultiLayerCAM.m / generateCrossMethodCAM.m /
+    // generateActivationsPanel.m (see src/explainability) when
+    // runPipelineForWeb.m calls them. Same jobDir, same per-upload
+    // lifecycle as gradcam.png/enhanced.png above - if a given file isn't
+    // there (older MATLAB project not yet wired up, or this particular
+    // run skipped it), `fs.existsSync` below just skips it and the
+    // corresponding *_url stays null. Nothing about the existing
+    // gradcam/enhanced flow changes.
+    ["multilayer.png", "multilayer_url"],
+    ["crossmethod.png", "crossmethod_url"],
+    ["activations.png", "activations_url"],
   ]) {
     const filePath = path.join(jobDir, fname);
     if (!fs.existsSync(filePath)) continue;

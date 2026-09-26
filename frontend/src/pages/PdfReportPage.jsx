@@ -36,6 +36,14 @@ export default function PdfReportPage() {
     );
   }
 
+  const enhancedSrc = activeAnalysis.enhanced_url || activeAnalysis.enhancedUrl;
+  const gradcamSrc = activeAnalysis.gradcam_url || activeAnalysis.gradcamUrl;
+  const crossmethodSrc = activeAnalysis.crossmethod_url || activeAnalysis.crossMethodUrl;
+  const multilayerSrc = activeAnalysis.multilayer_url || activeAnalysis.multiLayerUrl;
+  const activationsSrc = activeAnalysis.activations_url || activeAnalysis.activationsUrl;
+
+  const hasImaging = enhancedSrc || gradcamSrc || crossmethodSrc || multilayerSrc || activationsSrc;
+
   return (
     <FadeIn>
       <section>
@@ -125,41 +133,87 @@ export default function PdfReportPage() {
             </p>
           </div>
 
-          {(activeAnalysis.enhanced_url || activeAnalysis.gradcam_url) && (
-            <div className="mb-6 border-t border-black/10 pt-4">
+          {hasImaging && (
+            <div className="mb-6 border-t border-black/10 pt-4 print:break-inside-avoid">
               <h3 className="mb-3 font-display font-medium text-[#010110]">
-                Retinal Imaging
+                Retinal Imaging &amp; AI Explainability
               </h3>
-              <div className="grid grid-cols-2 gap-4">
-                {activeAnalysis.enhanced_url && (
-                  <div>
-                    <p className="mb-1 font-ui text-xs font-semibold uppercase text-[#8a8f98]">
-                      Enhanced Image
-                    </p>
-                    <img
-                      src={activeAnalysis.enhanced_url}
-                      alt="Enhanced fundus scan"
-                      className="w-full rounded-xl border border-black/10"
-                    />
-                  </div>
-                )}
-                {activeAnalysis.gradcam_url && (
-                  <div>
-                    <p className="mb-1 font-ui text-xs font-semibold uppercase text-[#8a8f98]">
-                      AI Attention Map (Grad-CAM)
-                    </p>
-                    <img
-                      src={activeAnalysis.gradcam_url}
-                      alt="Grad-CAM heatmap"
-                      className="w-full rounded-xl border border-black/10"
-                    />
-                  </div>
-                )}
-              </div>
+              
+              {/* Primary Pair: Enhanced & Grad-CAM */}
+              {(enhancedSrc || gradcamSrc) && (
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  {enhancedSrc && (
+                    <div>
+                      <p className="mb-1 font-ui text-xs font-semibold uppercase text-[#8a8f98]">
+                        Enhanced Image
+                      </p>
+                      <img
+                        src={enhancedSrc}
+                        alt="Enhanced fundus scan"
+                        className="w-full rounded-xl border border-black/10"
+                      />
+                    </div>
+                  )}
+                  {gradcamSrc && (
+                    <div>
+                      <p className="mb-1 font-ui text-xs font-semibold uppercase text-[#8a8f98]">
+                        AI Attention Map (Grad-CAM)
+                      </p>
+                      <img
+                        src={gradcamSrc}
+                        alt="Grad-CAM heatmap"
+                        className="w-full rounded-xl border border-black/10"
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Multi-Method Cross-Verification */}
+              {crossmethodSrc && (
+                <div className="mt-4">
+                  <p className="mb-1 font-ui text-xs font-semibold uppercase text-[#8a8f98]">
+                    Tri-Method Verification (Grad-CAM vs Occlusion vs LIME)
+                  </p>
+                  <img
+                    src={crossmethodSrc}
+                    alt="Grad-CAM vs Occlusion vs LIME comparison"
+                    className="w-full rounded-xl border border-black/10"
+                  />
+                </div>
+              )}
+
+              {/* Depth-wise Grad-CAM Progression */}
+              {multilayerSrc && (
+                <div className="mt-4">
+                  <p className="mb-1 font-ui text-xs font-semibold uppercase text-[#8a8f98]">
+                    Depth-Wise Grad-CAM Progression (Early / Mid / Late)
+                  </p>
+                  <img
+                    src={multilayerSrc}
+                    alt="Multi-layer Grad-CAM progression"
+                    className="w-full rounded-xl border border-black/10"
+                  />
+                </div>
+              )}
+
+              {/* Depth-wise Feature Activations */}
+              {activationsSrc && (
+                <div className="mt-4">
+                  <p className="mb-1 font-ui text-xs font-semibold uppercase text-[#8a8f98]">
+                    Multi-Depth Feature Activations (Edges / Textures / Lesions)
+                  </p>
+                  <img
+                    src={activationsSrc}
+                    alt="Neural activations panel"
+                    className="w-full rounded-xl border border-black/10"
+                  />
+                </div>
+              )}
             </div>
           )}
 
-          <div className="border-t border-black/10 pt-4">
+          <div className="border-t border-black/10 pt-4 print:break-inside-avoid">
             <h4 className="mb-1 font-display font-medium text-[#010110]">
               Recommendation
             </h4>
@@ -168,7 +222,7 @@ export default function PdfReportPage() {
             </p>
           </div>
 
-          <div className="mt-10 font-ui text-sm text-[#45545e]">
+          <div className="mt-10 font-ui text-sm text-[#45545e] print:break-inside-avoid">
             <div>_______________________</div>
             <div>Medical Officer Signature</div>
           </div>
