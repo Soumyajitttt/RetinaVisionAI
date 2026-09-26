@@ -4,6 +4,7 @@ const Specialist = require("../models/Specialist");
 const Patient = require("../models/Patient");
 const AnalysisResult = require("../models/AnalysisResult"); // NEW
 const asyncHandler = require("../utils/asyncHandler");
+const { discussionRoom } = require("../sockets");
 
 // A doctor is a "participant" in a discussion if they started it or were
 // the one invited into it - this is the only access check every route
@@ -134,7 +135,19 @@ const addComment = asyncHandler(async (req, res) => {
   // a reply would wipe out patient/analysis (since a plain Discussion
   // document doesn't have them) and the report would vanish from the page
   // the moment you send your first message.
-  res.status(201).json(await withPatientReport(discussion));
+  const withReport = await withPatientReport(discussion);
+
+  // NEW: real-time push to whoever else is currently viewing this
+  // discussion, over the room the socket layer joins clients into (see
+  // sockets/index.js). The REST response above is still what the poster's
+  // own screen updates from - this is purely for everyone else's screen,
+  // and it's a no-op if the io server hasn't been wired up (e.g. in tests).
+  const io = req.app.get("io");
+  if (io) {
+    io.to(discussionRoom(discussion.id)).emit("discussion:comment", withReport.comments[withReport.comments.length - 1]);
+  }
+
+  res.status(201).json(withReport);
 });
 
 module.exports = { listInvitableDoctors, createDiscussion, getMyDiscussions, getDiscussion, addComment };
