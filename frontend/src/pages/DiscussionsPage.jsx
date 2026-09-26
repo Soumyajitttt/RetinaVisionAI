@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { ArrowUpRightIcon, ArrowDownLeftIcon } from "@heroicons/react/24/outline";
 import FadeIn from "../components/FadeIn";
 import { useAuth } from "../context/AuthContext";
 import * as discussionsApi from "../api/discussions";
@@ -41,13 +42,13 @@ export default function DiscussionsPage() {
   return (
     <FadeIn>
       <section>
-        <div className="mb-5 rounded-2xl bg-white p-4 border border-black/[0.06] shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+        {/* <div className="mb-5 rounded-2xl bg-white p-4 border border-black/[0.06] shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
           <h2 className="font-display text-lg font-medium text-[#010110]">Discussions</h2>
           <p className="font-ui text-sm text-[#45545e]">
             Consultations with other doctors about specific patients - either you started, or a
             colleague invited you into.
           </p>
-        </div>
+        </div> */}
 
         {loading && <p className="font-ui text-sm text-[#45545e]">Loading discussions...</p>}
         {error && <p className="font-ui text-sm text-red-600">{error}</p>}
@@ -68,9 +69,22 @@ export default function DiscussionsPage() {
             <Link
               key={d.id}
               to={`/discussions/${d.id}`}
-              className="mb-3 flex items-center justify-between gap-4 rounded-2xl border border-black/[0.06] bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition hover:border-black/10 hover:shadow-[0_2px_6px_rgba(0,0,0,0.05)]"
+              className="mb-3 flex items-center gap-4 rounded-2xl border border-black/[0.06] bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition hover:border-black/10 hover:shadow-[0_2px_6px_rgba(0,0,0,0.05)]"
             >
-              <div className="min-w-0">
+              <span
+                title={youStarted ? "You started this discussion" : "You were invited to this discussion"}
+                className={`flex size-9 shrink-0 items-center justify-center rounded-full ${
+                  youStarted ? "bg-blue-100 text-blue-700" : "bg-emerald-100 text-emerald-700"
+                }`}
+              >
+                {youStarted ? (
+                  <ArrowUpRightIcon className="size-4" />
+                ) : (
+                  <ArrowDownLeftIcon className="size-4" />
+                )}
+              </span>
+
+              <div className="min-w-0 flex-1">
                 <h3 className="truncate font-ui font-semibold text-[#010110]">{d.subject}</h3>
                 <p className="font-ui text-sm text-[#45545e]">
                   {d.patientName} ({d.patientId}) &middot; {youStarted ? "with" : "invited by"}{" "}

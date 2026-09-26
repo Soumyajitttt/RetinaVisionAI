@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { io } from "socket.io-client";
+import { ArrowLeftIcon, ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline";
 import FadeIn from "../components/FadeIn";
 import PatientReportCard from "../components/PatientReportCard";
 import { useAuth } from "../context/AuthContext";
@@ -163,9 +164,9 @@ export default function DiscussionDetailPage() {
           <p className="mb-4 font-ui text-sm text-red-600">{error}</p>
           <button
             onClick={() => navigate("/discussions")}
-            className="rounded-full bg-[#111318] px-4 py-2 font-ui text-sm font-semibold text-white transition hover:bg-black"
+            className="flex items-center gap-1.5 rounded-full bg-[#111318] px-4 py-2 font-ui text-sm font-semibold text-white transition hover:bg-black"
           >
-            &larr; Back to Discussions
+            <ArrowLeftIcon className="size-4" /> Back to Discussions
           </button>
         </section>
       </FadeIn>
@@ -179,9 +180,9 @@ export default function DiscussionDetailPage() {
       <section>
         <button
           onClick={() => navigate("/discussions")}
-          className="mb-4 font-ui text-sm font-medium text-[#45545e] transition hover:text-[#010110]"
+          className="mb-4 flex items-center gap-1.5 font-ui text-sm font-medium text-[#45545e] transition hover:text-[#010110]"
         >
-          &larr; Back to Discussions
+          <ArrowLeftIcon className="size-4" /> Back to Discussions
         </button>
 
         <div className="mb-5 flex items-center justify-between gap-4 rounded-2xl border border-black/[0.06] bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
@@ -214,7 +215,10 @@ export default function DiscussionDetailPage() {
             className="flex w-full items-center justify-between px-5 py-4 text-left transition hover:bg-[#f8f8f8]"
           >
             <h3 className="font-display text-base font-medium text-[#010110]">Patient Report</h3>
-            <span className="font-ui text-sm text-[#8a8f98]">{reportOpen ? "Hide \u2191" : "View \u2193"}</span>
+            <span className="flex items-center gap-1 font-ui text-sm text-[#8a8f98]">
+              {reportOpen ? "Hide" : "View"}
+              {reportOpen ? <ChevronUpIcon className="size-4" /> : <ChevronDownIcon className="size-4" />}
+            </span>
           </button>
           {reportOpen && (
             <div className="border-t border-black/[0.06] p-6">
