@@ -25,3 +25,11 @@ export function addComment(id, text) {
     body: JSON.stringify({ text })
   });
 }
+
+// Tells the backend "I've read this thread" - called when a discussion is
+// already open and a new reply streams in over the socket (see
+// DiscussionDetailPage), so the unread indicator doesn't come back the next
+// time this doctor visits the Discussions list.
+export function markRead(id) {
+  return apiFetch(`/api/discussions/${id}/read`, { method: "POST" });
+}

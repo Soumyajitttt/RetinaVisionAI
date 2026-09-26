@@ -15,6 +15,7 @@ import {
   HomeIcon
 } from "@heroicons/react/24/outline";
 import { useAuth } from "../context/AuthContext";
+import { useDiscussionNotifications } from "../context/DiscussionNotificationsContext";
 import Modal from "./modals/Modal";
 
 const PHC_NAV_ITEMS = [
@@ -35,6 +36,7 @@ export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const [confirmLogoutOpen, setConfirmLogoutOpen] = useState(false);
   const { user, logout } = useAuth();
+  const { totalUnread } = useDiscussionNotifications();
   const navItems = user?.role === "doctor" ? DOCTOR_NAV_ITEMS : PHC_NAV_ITEMS;
 
   function handleConfirmLogout() {
@@ -60,21 +62,42 @@ export default function Sidebar() {
       </div>
 
       <nav className="flex-1 space-y-1 overflow-y-auto px-2 py-4" aria-label="Primary">
-        {navItems.map(({ to, label, icon: Icon }) => (
-          <NavLink
-            key={to}
-            to={to}
-            title={collapsed ? label : undefined}
-            className={({ isActive }) =>
-              `flex items-center gap-3 rounded-xl px-3 py-2.5 font-ui text-sm font-medium transition-colors ${
-                isActive ? "bg-white/10 text-white" : "text-white/55 hover:bg-white/5 hover:text-white"
-              }`
-            }
-          >
-            <Icon className="size-[19px] shrink-0" />
-            {!collapsed && <span className="truncate">{label}</span>}
-          </NavLink>
-        ))}
+        {navItems.map(({ to, label, icon: Icon }) => {
+          // Only the Discussions nav item ever carries a badge - unread
+          // replies, live, from DiscussionNotificationsContext's socket
+          // (see that file for how it stays in sync from anywhere in the
+          // app, not just while a thread is actually open).
+          const showBadge = to === "/discussions" && totalUnread > 0;
+          return (
+            <NavLink
+              key={to}
+              to={to}
+              title={collapsed ? (showBadge ? `${label} (${totalUnread} unread)` : label) : undefined}
+              className={({ isActive }) =>
+                `relative flex items-center gap-3 rounded-xl px-3 py-2.5 font-ui text-sm font-medium transition-colors ${
+                  isActive ? "bg-white/10 text-white" : "text-white/55 hover:bg-white/5 hover:text-white"
+                }`
+              }
+            >
+              <span className="relative shrink-0">
+                <Icon className="size-[19px]" />
+                {showBadge && collapsed && (
+                  <span className="absolute -right-1 -top-1 flex size-2 rounded-full bg-red-500" />
+                )}
+              </span>
+              {!collapsed && (
+                <span className="flex min-w-0 flex-1 items-center justify-between gap-2">
+                  <span className="truncate">{label}</span>
+                  {showBadge && (
+                    <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-red-500 font-ui text-[11px] font-semibold text-white">
+                      {totalUnread > 9 ? "9+" : totalUnread}
+                    </span>
+                  )}
+                </span>
+              )}
+            </NavLink>
+          );
+        })}
       </nav>
 
       <div className="border-t border-white/10 p-2">

@@ -5,6 +5,7 @@ import { ArrowLeftIcon, ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/
 import FadeIn from "../components/FadeIn";
 import PatientReportCard from "../components/PatientReportCard";
 import { useAuth } from "../context/AuthContext";
+import { useDiscussionNotifications } from "../context/DiscussionNotificationsContext";
 import * as discussionsApi from "../api/discussions";
 import { getToken } from "../api/client";
 
@@ -42,6 +43,11 @@ export default function DiscussionDetailPage() {
   const { id } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
+  // Backend marks this thread read server-side on every GET (see
+  // discussionController.getDiscussion), but the sidebar/list badge is
+  // driven by this shared context's own state - clear it here too so it
+  // doesn't wait for a fresh fetch to catch up.
+  const { markRead: markReadLocally } = useDiscussionNotifications();
 
   const [discussion, setDiscussion] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -64,7 +70,12 @@ export default function DiscussionDetailPage() {
       // doctor accounts have no access to /api/patients or /api/analysis
       // directly, so this embedding is the only way the report reaches
       // this page. No separate fetch needed.
-      .then(setDiscussion)
+      .then((data) => {
+        setDiscussion(data);
+        // Opening the thread already marked it read server-side - reflect
+        // that immediately in the shared badge state too.
+        markReadLocally(id);
+      })
       .catch((err) => setError(err.message || "Failed to load discussion"))
       .finally(() => setLoading(false));
   }
@@ -99,6 +110,17 @@ export default function DiscussionDetailPage() {
         if (!prev || prev.comments.some((c) => c.id === comment.id)) return prev;
         return { ...prev, comments: [...prev.comments, comment] };
       });
+
+      // A reply from the OTHER doctor arriving while this thread is
+      // already open counts as read on arrival - tell the backend (so the
+      // unread indicator doesn't reappear next visit) and clear the local
+      // badge state right away. The poster's own broadcast of their own
+      // comment is skipped above by the dedupe check, so this only ever
+      // fires for genuinely new incoming replies.
+      if (comment.authorId !== user?.id) {
+        discussionsApi.markRead(id).catch(() => {});
+        markReadLocally(id);
+      }
     });
 
     socket.on("discussion:typing", ({ authorName, isTyping }) => {

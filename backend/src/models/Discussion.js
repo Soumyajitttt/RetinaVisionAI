@@ -30,7 +30,16 @@ const discussionSchema = new mongoose.Schema(
     startedByName: { type: String, required: true },
     invitedDoctorId: { type: String, required: true, index: true },
     invitedDoctorName: { type: String, required: true },
-    comments: [commentSchema]
+    comments: [commentSchema],
+    // Per-participant "last read" timestamp, keyed by doctorId (same
+    // clinicianId convention as startedBy/invitedDoctorId). Used to derive
+    // an unread-reply indicator: any comment authored by the OTHER doctor
+    // with createdAt after this doctor's own entry here counts as unread.
+    // Never serialized directly (see toJSON below) - always surfaced as a
+    // derived `unreadCount` computed per-viewer in discussionController.js,
+    // since a raw Map keyed by doctorId would otherwise leak the other
+    // participant's read timestamp to whoever fetches the discussion.
+    lastReadAt: { type: Map, of: Date, default: () => new Map() }
   },
   { timestamps: true }
 );
@@ -50,6 +59,7 @@ discussionSchema.set("toJSON", {
     }
     delete ret._id;
     delete ret.__v;
+    delete ret.lastReadAt;
     return ret;
   }
 });

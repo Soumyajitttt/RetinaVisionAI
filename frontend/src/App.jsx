@@ -1,6 +1,7 @@
 import { Routes, Route, Outlet } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { AppProvider } from "./context/AppContext";
+import { DiscussionNotificationsProvider } from "./context/DiscussionNotificationsContext";
 import Sidebar from "./components/Sidebar";
 import Topbar from "./components/Topbar";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -63,105 +64,107 @@ function DoctorRoute({ children }) {
 export default function App() {
   return (
     <AuthProvider>
-      <AppProvider>
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route element={<AppLayout />}>
-            <Route
-              path="/analyze"
-              element={
-                <PhcRoute>
-                  <FundusAnalyzer />
-                </PhcRoute>
-              }
-            />
-            <Route
-              path="/database"
-              element={
-                <PhcRoute>
-                  <DatabasePage />
-                </PhcRoute>
-              }
-            />
-            <Route
-              path="/report"
-              element={
-                <PhcRoute>
-                  <UserReportPage />
-                </PhcRoute>
-              }
-            />
-            <Route
-              path="/grading"
-              element={
-                <PhcRoute>
-                  <GradingDetailPage />
-                </PhcRoute>
-              }
-            />
-            <Route
-              path="/pdf-report"
-              element={
-                <PhcRoute>
-                  <PdfReportPage />
-                </PhcRoute>
-              }
-            />
-            <Route
-              path="/specialists"
-              element={
-                <PhcRoute>
-                  <SpecialistsPage />
-                </PhcRoute>
-              }
-            />
-            <Route
-              path="/referrals"
-              element={
-                <PhcRoute>
-                  <ReferralHistoryPage />
-                </PhcRoute>
-              }
-            />
-            <Route
-              path="/doctor"
-              element={
-                <DoctorRoute>
-                  <DoctorInboxPage />
-                </DoctorRoute>
-              }
-            />
-            <Route
-              path="/discussions"
-              element={
-                <DoctorRoute>
-                  <DiscussionsPage />
-                </DoctorRoute>
-              }
-            />
-            <Route
-              path="/discussions/:id"
-              element={
-                <DoctorRoute>
-                  <DiscussionDetailPage />
-                </DoctorRoute>
-              }
-            />
-            <Route
-              path="*"
-              element={
-                <p className="font-ui text-sm text-[#45545e]">
-                  Page not found.
-                </p>
-              }
-            />
-          </Route>
-        </Routes>
+      <DiscussionNotificationsProvider>
+        <AppProvider>
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route element={<AppLayout />}>
+              <Route
+                path="/analyze"
+                element={
+                  <PhcRoute>
+                    <FundusAnalyzer />
+                  </PhcRoute>
+                }
+              />
+              <Route
+                path="/database"
+                element={
+                  <PhcRoute>
+                    <DatabasePage />
+                  </PhcRoute>
+                }
+              />
+              <Route
+                path="/report"
+                element={
+                  <PhcRoute>
+                    <UserReportPage />
+                  </PhcRoute>
+                }
+              />
+              <Route
+                path="/grading"
+                element={
+                  <PhcRoute>
+                    <GradingDetailPage />
+                  </PhcRoute>
+                }
+              />
+              <Route
+                path="/pdf-report"
+                element={
+                  <PhcRoute>
+                    <PdfReportPage />
+                  </PhcRoute>
+                }
+              />
+              <Route
+                path="/specialists"
+                element={
+                  <PhcRoute>
+                    <SpecialistsPage />
+                  </PhcRoute>
+                }
+              />
+              <Route
+                path="/referrals"
+                element={
+                  <PhcRoute>
+                    <ReferralHistoryPage />
+                  </PhcRoute>
+                }
+              />
+              <Route
+                path="/doctor"
+                element={
+                  <DoctorRoute>
+                    <DoctorInboxPage />
+                  </DoctorRoute>
+                }
+              />
+              <Route
+                path="/discussions"
+                element={
+                  <DoctorRoute>
+                    <DiscussionsPage />
+                  </DoctorRoute>
+                }
+              />
+              <Route
+                path="/discussions/:id"
+                element={
+                  <DoctorRoute>
+                    <DiscussionDetailPage />
+                  </DoctorRoute>
+                }
+              />
+              <Route
+                path="*"
+                element={
+                  <p className="font-ui text-sm text-[#45545e]">
+                    Page not found.
+                  </p>
+                }
+              />
+            </Route>
+          </Routes>
 
-        {/* Rendered globally (not inside Header) so the Landing page's own
-            hero nav can trigger it too - see hero-01-content.jsx's Login button. */}
-        <AuthModal />
-      </AppProvider>
+          {/* Rendered globally (not inside Header) so the Landing page's own
+              hero nav can trigger it too - see hero-01-content.jsx's Login button. */}
+          <AuthModal />
+        </AppProvider>
+      </DiscussionNotificationsProvider>
     </AuthProvider>
   );
 }
