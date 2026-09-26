@@ -11,10 +11,17 @@ const GRADE_NOTES = {
 
 /**
  * Full patient + AI report block: patient info, grading result, lesion
- * counts, enhanced/Grad-CAM images, and recommendation. Used by both
- * DoctorInboxPage (inside each referral's expandable card) and
- * DiscussionDetailPage (so the invited doctor sees the actual report the
- * discussion is about, not just the subject line).
+ * counts, and every explainability image the pipeline produced
+ * (enhanced/Grad-CAM/Cross-Method/Multi-Layer CAM/Activations), plus
+ * recommendation. Used by both DoctorInboxPage (inside each referral's
+ * expandable card) and DiscussionDetailPage (so the invited doctor sees
+ * the actual report the discussion is about, not just the subject line).
+ *
+ * NEW: previously only rendered enhanced_url/gradcam_url - the newer
+ * multilayer_url/crossmethod_url/activations_url fields (now produced by
+ * runPipelineForWeb.m's Module 4) were silently dropped here, even though
+ * ResultsTab.jsx and PdfReportPage.jsx already show them. Doctors were
+ * seeing only 2 of the 5 explainability views.
  */
 export default function PatientReportCard({ patient, analysis }) {
   if (!patient || !analysis) {
@@ -25,6 +32,13 @@ export default function PatientReportCard({ patient, analysis }) {
       </p>
     );
   }
+
+  const enhancedSrc = analysis.enhanced_url || analysis.enhancedUrl;
+  const gradcamSrc = analysis.gradcam_url || analysis.gradcamUrl;
+  const crossmethodSrc = analysis.crossmethod_url || analysis.crossMethodUrl;
+  const multilayerSrc = analysis.multilayer_url || analysis.multiLayerUrl;
+  const activationsSrc = analysis.activations_url || analysis.activationsUrl;
+  const hasImaging = enhancedSrc || gradcamSrc || crossmethodSrc || multilayerSrc || activationsSrc;
 
   return (
     <>
@@ -67,35 +81,79 @@ export default function PatientReportCard({ patient, analysis }) {
         </p>
       </div>
 
-      {(analysis.enhanced_url || analysis.gradcam_url) && (
+      {hasImaging && (
         <div className="mb-5 border-t border-black/10 pt-4">
-          <h4 className="mb-3 font-display font-medium text-[#010110]">Retinal Imaging</h4>
-          <div className="grid grid-cols-2 gap-4">
-            {analysis.enhanced_url && (
-              <div>
-                <p className="mb-1 font-ui text-xs font-semibold uppercase text-[#8a8f98]">
-                  Enhanced Image
-                </p>
-                <img
-                  src={analysis.enhanced_url}
-                  alt="Enhanced fundus scan"
-                  className="w-full rounded-xl border border-black/10"
-                />
-              </div>
-            )}
-            {analysis.gradcam_url && (
-              <div>
-                <p className="mb-1 font-ui text-xs font-semibold uppercase text-[#8a8f98]">
-                  AI Attention Map (Grad-CAM)
-                </p>
-                <img
-                  src={analysis.gradcam_url}
-                  alt="Grad-CAM heatmap"
-                  className="w-full rounded-xl border border-black/10"
-                />
-              </div>
-            )}
-          </div>
+          <h4 className="mb-3 font-display font-medium text-[#010110]">
+            Retinal Imaging &amp; AI Explainability
+          </h4>
+
+          {(enhancedSrc || gradcamSrc) && (
+            <div className="mb-4 grid grid-cols-2 gap-4">
+              {enhancedSrc && (
+                <div>
+                  <p className="mb-1 font-ui text-xs font-semibold uppercase text-[#8a8f98]">
+                    Enhanced Image
+                  </p>
+                  <img
+                    src={enhancedSrc}
+                    alt="Enhanced fundus scan"
+                    className="w-full rounded-xl border border-black/10"
+                  />
+                </div>
+              )}
+              {gradcamSrc && (
+                <div>
+                  <p className="mb-1 font-ui text-xs font-semibold uppercase text-[#8a8f98]">
+                    AI Attention Map (Grad-CAM)
+                  </p>
+                  <img
+                    src={gradcamSrc}
+                    alt="Grad-CAM heatmap"
+                    className="w-full rounded-xl border border-black/10"
+                  />
+                </div>
+              )}
+            </div>
+          )}
+
+          {crossmethodSrc && (
+            <div className="mt-4">
+              <p className="mb-1 font-ui text-xs font-semibold uppercase text-[#8a8f98]">
+                Tri-Method Verification (Grad-CAM vs Occlusion vs LIME)
+              </p>
+              <img
+                src={crossmethodSrc}
+                alt="Grad-CAM vs Occlusion vs LIME comparison"
+                className="w-full rounded-xl border border-black/10"
+              />
+            </div>
+          )}
+
+          {multilayerSrc && (
+            <div className="mt-4">
+              <p className="mb-1 font-ui text-xs font-semibold uppercase text-[#8a8f98]">
+                Depth-Wise Grad-CAM Progression (Early / Mid / Late)
+              </p>
+              <img
+                src={multilayerSrc}
+                alt="Multi-layer Grad-CAM progression"
+                className="w-full rounded-xl border border-black/10"
+              />
+            </div>
+          )}
+
+          {activationsSrc && (
+            <div className="mt-4">
+              <p className="mb-1 font-ui text-xs font-semibold uppercase text-[#8a8f98]">
+                Multi-Depth Feature Activations (Edges / Textures / Lesions)
+              </p>
+              <img
+                src={activationsSrc}
+                alt="Neural activations panel"
+                className="w-full rounded-xl border border-black/10"
+              />
+            </div>
+          )}
         </div>
       )}
 

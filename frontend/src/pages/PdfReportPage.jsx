@@ -19,12 +19,12 @@ export default function PdfReportPage() {
   const { activePatient, activeAnalysis } = useApp();
   const navigate = useNavigate();
   const reportRef = useRef(null);
-  // NEW: window.print() used to fire the instant the button was clicked.
-  // Just waiting for each <img>'s "load" event turned out not to be
-  // enough - "loaded" isn't the same as "decoded and painted", and
-  // Chrome's print snapshot doesn't reliably wait for that last step, so
-  // the Cloudinary-hosted enhanced/gradcam/etc. images could still come
-  // out blank in the actual PDF/printout even though they were visibly on
+  // window.print() used to fire the instant the button was clicked. Just
+  // waiting for each <img>'s "load" event turned out not to be enough -
+  // "loaded" isn't the same as "decoded and painted", and Chrome's print
+  // snapshot doesn't reliably wait for that last step, so the
+  // Cloudinary-hosted enhanced/gradcam/etc. images could still come out
+  // blank in the actual PDF/printout even though they were visibly on
   // screen. The reliable fix: convert every report image to a data: URL
   // (fetched + base64-encoded, fully in memory - no network or decode
   // race left at print time) before calling print. Cloudinary's delivery
@@ -128,7 +128,7 @@ export default function PdfReportPage() {
           ref={reportRef}
           className="relative mx-auto max-w-3xl rounded-2xl border border-black/[0.06] bg-white p-10 shadow-[0_1px_2px_rgba(0,0,0,0.03)] print:m-0 print:max-w-none print:rounded-none print:border-none print:p-6 print:shadow-none"
         >
-          <div className="mb-6 flex justify-between border-b-2 border-black/10 pb-4">
+          <div className="mb-6 flex justify-between border-b-2 border-black/10 pb-4 print:break-inside-avoid">
             <div>
               <h2 className="font-display text-xl font-medium text-[#010110]">
                 PRIMARY HEALTH CENTRE TELE-RETINA REPORT
@@ -153,7 +153,7 @@ export default function PdfReportPage() {
             </div>
           </div>
 
-          <div className="mb-6 grid grid-cols-2 gap-3 rounded-xl bg-[#f8f8f8] p-4 font-ui text-sm text-[#242424]">
+          <div className="mb-6 grid grid-cols-2 gap-3 rounded-xl bg-[#f8f8f8] p-4 font-ui text-sm text-[#242424] print:break-inside-avoid">
             <div>
               <strong>Patient Name:</strong> {activePatient.name}
             </div>
@@ -169,7 +169,7 @@ export default function PdfReportPage() {
             </div>
           </div>
 
-          <div className="mb-6">
+          <div className="mb-6 print:break-inside-avoid">
             <h3 className="mb-2 border-b border-black/10 pb-2 font-display font-medium text-[#010110]">
               Automated Diagnostic Findings
             </h3>
@@ -198,15 +198,31 @@ export default function PdfReportPage() {
             </p>
           </div>
 
+          {/*
+            FIX: this whole section used to be ONE print:break-inside-avoid
+            block wrapping all 5 explainability images. That block is
+            taller than a single printed page, so telling the browser
+            "never break inside this" was an impossible instruction - it
+            has no choice but to overflow/truncate the block wherever the
+            page physically ends, which is exactly why the bottom image
+            (Activations) was coming out cut off / blank in the PDF.
+
+            Fix: only the OUTER heading is here; each image (or image
+            pair) below has break-inside-avoid on its OWN, smaller
+            container instead. That keeps each image's heading glued to
+            its image (never split apart), while still letting the
+            browser insert a page break BETWEEN images, wherever they
+            naturally land - which is what actually prevents anything
+            from being truncated.
+          */}
           {hasImaging && (
-            <div className="mb-6 border-t border-black/10 pt-4 print:break-inside-avoid">
-              <h3 className="mb-3 font-display font-medium text-[#010110]">
+            <div className="mb-6 border-t border-black/10 pt-4">
+              <h3 className="mb-3 font-display font-medium text-[#010110] print:break-after-avoid">
                 Retinal Imaging &amp; AI Explainability
               </h3>
-              
-              {/* Primary Pair: Enhanced & Grad-CAM */}
+
               {(enhancedSrc || gradcamSrc) && (
-                <div className="grid grid-cols-2 gap-4 mb-4">
+                <div className="mb-4 grid grid-cols-2 gap-4 print:break-inside-avoid">
                   {enhancedSrc && (
                     <div>
                       <p className="mb-1 font-ui text-xs font-semibold uppercase text-[#8a8f98]">
@@ -234,9 +250,8 @@ export default function PdfReportPage() {
                 </div>
               )}
 
-              {/* Multi-Method Cross-Verification */}
               {crossmethodSrc && (
-                <div className="mt-4">
+                <div className="mt-4 print:break-inside-avoid">
                   <p className="mb-1 font-ui text-xs font-semibold uppercase text-[#8a8f98]">
                     Tri-Method Verification (Grad-CAM vs Occlusion vs LIME)
                   </p>
@@ -248,9 +263,8 @@ export default function PdfReportPage() {
                 </div>
               )}
 
-              {/* Depth-wise Grad-CAM Progression */}
               {multilayerSrc && (
-                <div className="mt-4">
+                <div className="mt-4 print:break-inside-avoid">
                   <p className="mb-1 font-ui text-xs font-semibold uppercase text-[#8a8f98]">
                     Depth-Wise Grad-CAM Progression (Early / Mid / Late)
                   </p>
@@ -262,9 +276,8 @@ export default function PdfReportPage() {
                 </div>
               )}
 
-              {/* Depth-wise Feature Activations */}
               {activationsSrc && (
-                <div className="mt-4">
+                <div className="mt-4 print:break-inside-avoid">
                   <p className="mb-1 font-ui text-xs font-semibold uppercase text-[#8a8f98]">
                     Multi-Depth Feature Activations (Edges / Textures / Lesions)
                   </p>
