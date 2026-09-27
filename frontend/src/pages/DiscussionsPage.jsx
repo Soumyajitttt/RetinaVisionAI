@@ -48,13 +48,7 @@ export default function DiscussionsPage() {
   return (
     <FadeIn>
       <section>
-        {/* <div className="mb-5 rounded-2xl bg-white p-4 border border-black/[0.06] shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
-          <h2 className="font-display text-lg font-medium text-[#010110]">Discussions</h2>
-          <p className="font-ui text-sm text-[#45545e]">
-            Consultations with other doctors about specific patients - either you started, or a
-            colleague invited you into.
-          </p>
-        </div> */}
+        <h1 className="mb-5 font-display text-[28px] font-semibold tracking-tight text-[#0a0e14]">Discussions</h1>
 
         {loading && <p className="font-ui text-sm text-[#45545e]">Loading discussions...</p>}
         {error && <p className="font-ui text-sm text-red-600">{error}</p>}

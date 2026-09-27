@@ -1,7 +1,7 @@
 const TABS = [
   { key: "analysis", label: "Analysis" },
-  { key: "results", label: "Result / Grading" },
-  { key: "report", label: "Report" }
+  { key: "results", label: "Result / Grading" }
+  // { key: "report", label: "Report" }
 ];
 
 export default function ReportTabs({ activeTab, onChange }) {

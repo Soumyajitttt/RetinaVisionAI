@@ -50,10 +50,10 @@ export default function Sidebar() {
         collapsed ? "w-[76px]" : "w-64"
       }`}
     >
-      <div className="flex items-center gap-2 border-b border-white/10 px-4 py-4">
+      <div className="flex items-center gap-2 border-b border-white/10 px-4 py-3">
         <Link to="/" className="flex min-w-0 items-center gap-2" aria-label="RetinaVision AI home">
-          <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-white/10 text-white">
-            <HomeIcon className="size-[18px]" />
+          <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-white/10 text-white">
+            <HomeIcon className="size-4" />
           </span>
           {!collapsed && (
             <span className="truncate font-display text-[15px] font-medium text-white">RetinaVision AI</span>
@@ -102,12 +102,17 @@ export default function Sidebar() {
 
       <div className="border-t border-white/10 p-2">
         {!collapsed && (
-          <div className="mb-1 px-2 py-2">
-            <p className="truncate font-ui text-sm font-medium text-white">{user?.name || "Clinician"}</p>
-            <p className="truncate font-ui text-xs text-white/40">
-              {user?.id}
-              {user?.role === "doctor" && <span className="ml-1.5 rounded-full bg-white/10 px-1.5 py-0.5 text-[10px] uppercase tracking-wide">Doctor</span>}
-            </p>
+          <div className="mb-2 flex items-center gap-2.5 px-2 py-2">
+            <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-white/10 text-white/70">
+              <UserIcon className="size-4" />
+            </span>
+            <div className="min-w-0">
+              <p className="truncate font-ui text-sm font-medium text-white">{user?.name || "Clinician"}</p>
+              <p className="truncate font-ui text-xs text-white/40">
+                {user?.id}
+                {user?.role === "doctor" && <span className="ml-1.5 rounded-full bg-white/10 px-1.5 py-0.5 text-[10px] uppercase tracking-wide">Doctor</span>}
+              </p>
+            </div>
           </div>
         )}
 
