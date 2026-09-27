@@ -4,13 +4,28 @@ import { ArrowRightIcon } from "@heroicons/react/24/outline";
 function PatientRow({ patient, onViewReport }) {
   const isGraded = patient.grade != null && patient.gradeText;
 
+  // Same "first letter(s) of each word" initials DoctorInboxPage's
+  // ReferralRow uses for its patient avatar circle.
+  const initials = (patient.name || "?")
+    .split(" ")
+    .map((w) => w[0])
+    .slice(0, 2)
+    .join("");
+
   return (
     <tr className="border-b border-black/5 last:border-0 hover:bg-[#f8f8f8]">
       <td className="px-4 py-3 font-ui font-semibold text-[#242424]">{patient.id}</td>
       <td className="px-4 py-3">
-        <div className="font-ui font-medium text-[#010110]">{patient.name}</div>
-        <div className="font-ui text-xs text-[#45545e]">
-          {patient.age} Yrs • {patient.gender}
+        <div className="flex items-center gap-3">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#eef2f6] font-ui text-xs font-semibold text-[#334155]">
+            {initials}
+          </div>
+          <div className="min-w-0">
+            <div className="truncate font-ui font-medium text-[#010110]">{patient.name}</div>
+            <div className="font-ui text-xs text-[#45545e]">
+              {patient.age} Yrs • {patient.gender}
+            </div>
+          </div>
         </div>
       </td>
       <td className="px-4 py-3 font-ui text-sm text-[#45545e]">{patient.screenDate}</td>

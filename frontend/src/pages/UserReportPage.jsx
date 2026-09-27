@@ -67,14 +67,14 @@ export default function UserReportPage() {
   return (
     <FadeIn>
       <section>
-        <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-white p-4 border border-black/[0.06] shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
           <div>
-            <span className="rounded-full bg-[#efeff0] px-2 py-0.5 font-ui text-xs font-semibold text-[#010110]">
+            <span className="rounded-full bg-[#eef2f6] px-2 py-0.5 font-ui text-xs font-semibold text-[#334155]">
               ACTIVE USER REPORT
             </span>
-            <h2 className="mt-1 font-display text-lg font-medium text-[#010110]">
+            <h1 className="mt-1 font-display text-[28px] font-semibold tracking-tight text-[#0a0e14]">
               {activePatient.name} (ID: {activePatient.id})
-            </h2>
+            </h1>
           </div>
           <button
             onClick={() => navigate("/database")}
@@ -113,13 +113,13 @@ export default function UserReportPage() {
             />
           ))}
 
-        {activeTab === "report" && (
+        {/* {activeTab === "report" && (
           <ReportTab
             patient={activePatient}
             analysis={activeAnalysis}
             onReferToSpecialist={() => navigate("/specialists")}
           />
-        )}
+        )} */}
       </section>
     </FadeIn>
   );

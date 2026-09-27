@@ -141,21 +141,24 @@ export default function DiscussionDetailPage() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [discussion?.comments?.length]);
 
-  // Swaps Topbar's default "Discussion" MAIN HEADER for this thread's own
-  // "Re: <patient> · with <doctor>" line while this page is open, and puts
-  // the default back the moment it isn't (route change or unmount) - see
-  // PageHeaderContext. Derived as a plain string (not read straight off
-  // `discussion` in the effect) so re-running the effect on every new
-  // comment - which produces a new `discussion` object but the same
-  // patient/doctor names - doesn't reset-then-reset Topbar's text on every
-  // message.
+  // Swaps into Topbar's own title area while this thread is open (see
+  // Topbar.jsx) - the one page that still uses Topbar for its heading,
+  // rather than a page-level h1, since this reads more like transient
+  // thread chrome ("From/To <doctor>") than a static page title. Topbar
+  // renders the back-to-Discussions arrow alongside this title itself, so
+  // this page no longer needs its own inline back button once the
+  // discussion has loaded. Cleared again on unmount so the default
+  // (title-less) Topbar comes back.
+  // Derived as a plain string (not read straight off `discussion` in the
+  // effect) so re-running the effect on every new comment - which produces
+  // a new `discussion` object but the same patient/doctor names - doesn't
+  // reset-then-reset Topbar's text on every message.
   const headerTitle = discussion
-    ? `${discussion.startedBy === user?.id ? "To" : "From"} 
-      ${
+    ? `${
         discussion.startedBy === user?.id
           ? discussion.invitedDoctorName
           : discussion.startedByName
-      }`
+        }`
     : null;
 
   useEffect(() => {
@@ -164,9 +167,8 @@ export default function DiscussionDetailPage() {
     return () => setHeaderTitle(null);
   }, [headerTitle, setHeaderTitle]);
 
-  // "Start Video Call" now lives in Topbar's top-right corner (see
-  // PageHeaderContext/Topbar) instead of inline in the card below, so it's
-  // set here the same way headerTitle is, and cleared again on unmount.
+  // "Start Video Call" lives in Topbar's top-right corner (see
+  // PageHeaderContext/Topbar) instead of inline in the card below.
   useEffect(() => {
     if (!discussion) return undefined;
     setAction(
@@ -241,13 +243,6 @@ export default function DiscussionDetailPage() {
   return (
     <FadeIn>
       <section>
-        <button
-          onClick={() => navigate("/discussions")}
-          className="mb-2.5 flex items-center gap-1.5 font-ui text-sm font-medium text-[#45545e] transition hover:text-[#010110]"
-        >
-          <ArrowLeftIcon className="size-4" /> Back to Discussions
-        </button>
-
         {/* One unified card, now a single row: the subject text doubles as
             the row's title (no separate "Patient Report" label sitting
             right under it), and the whole row toggles the report below -

@@ -59,9 +59,9 @@ export default function ReferralHistoryPage() {
   return (
     <FadeIn>
       <section>
-        <div className="mb-5 rounded-2xl bg-white p-4 border border-black/[0.06] shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
-          <h2 className="font-display text-lg font-medium text-[#010110]">Referral History</h2>
-          <p className="font-ui text-sm text-[#45545e]">
+        <div className="mb-5">
+          <h1 className="font-display text-[28px] font-semibold tracking-tight text-[#0a0e14]">Referral History</h1>
+          <p className="mt-1 font-ui text-sm text-[#45545e]">
             Every patient referred to a specialist, with the date and email delivery status.
           </p>
         </div>
@@ -114,4 +114,3 @@ export default function ReferralHistoryPage() {
     </FadeIn>
   );
 }
-

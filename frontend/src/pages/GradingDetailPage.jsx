@@ -77,9 +77,11 @@ export default function GradingDetailPage() {
 
   return (
     <FadeIn>
-      <section className="rounded-2xl bg-white p-6 border border-black/[0.06] shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-          <h2 className="font-display text-lg font-medium text-[#010110]">Diagnostic Grading &amp; Grad-CAM Analysis</h2>
+      <section>
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+          <h1 className="font-display text-[28px] font-semibold tracking-tight text-[#0a0e14]">
+            Diagnostic Grading &amp; Grad-CAM Analysis
+          </h1>
           <button
             onClick={() => navigate("/report")}
             className="flex items-center gap-1.5 rounded-full border border-black/15 px-4 py-2 font-ui text-sm font-medium text-[#242424] transition hover:bg-[#f5f5f2]"
@@ -88,6 +90,7 @@ export default function GradingDetailPage() {
           </button>
         </div>
 
+        <div className="rounded-2xl bg-white p-6 border border-black/[0.06] shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
         <div className="grid gap-5 md:grid-cols-3">
           <div className="rounded-2xl bg-[#f8f8f8] p-5">
             <h4 className="font-ui text-xs font-bold uppercase text-[#8a8f98]">1. Grade</h4>
@@ -191,6 +194,7 @@ export default function GradingDetailPage() {
             </div>
           );
         })()}
+        </div>
       </section>
     </FadeIn>
   );

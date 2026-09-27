@@ -102,10 +102,10 @@ export default function PdfReportPage() {
   return (
     <FadeIn>
       <section>
-        <div className="mb-4 flex items-center justify-between print:hidden">
-          <h2 className="font-display text-lg font-medium text-[#010110]">
+        <div className="mb-5 flex items-center justify-between print:hidden">
+          <h1 className="font-display text-[28px] font-semibold tracking-tight text-[#0a0e14]">
             Report Preview
-          </h2>
+          </h1>
           <div className="flex gap-2">
             <button
               onClick={() => navigate("/report")}
@@ -118,7 +118,7 @@ export default function PdfReportPage() {
               disabled={isPreparingPrint}
               className="flex items-center gap-1.5 rounded-full bg-[#111318] px-4 py-2 font-ui text-sm font-semibold text-white transition hover:bg-black disabled:cursor-wait disabled:opacity-60"
             >
-              {isPreparingPrint ? "Preparing…" : "Download / Print PDF"}{" "}
+              {isPreparingPrint ? "Preparing…" : "Print PDF"}{" "}
               <ArrowRightIcon className="size-4" />
             </button>
           </div>

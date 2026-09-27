@@ -2,9 +2,11 @@
 /*
  * App-shell typography (dashboard pages/components only). Kept as a
  * separate import + separate theme tokens so the landing page's Originkit
- * fonts/tokens above are completely untouched.
+ * fonts/tokens above are completely untouched. Inter, per the design
+ * system: 400/500 for body text and secondary details, 600/700 for
+ * headings and emphasis.
  */
-@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
 @import "tailwindcss";
 
 /*
@@ -20,9 +22,11 @@
   --font-helvetica-neue: "Helvetica Neue", Helvetica, Arial, sans-serif;
 
   /* App shell only (sidebar/topbar/pages/cards/modals) - landing page keeps
-     the tokens above untouched. */
-  --font-display: "Space Grotesk", "Inter Tight", Inter, sans-serif;
-  --font-ui: "Manrope", Inter, sans-serif;
+     the tokens above untouched. One typeface (Inter) throughout the
+     dashboard rather than a display/body pairing, per the design system:
+     600 for headings, 500 for names/labels/nav, 400 for secondary text. */
+  --font-display: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-ui: "Inter", ui-sans-serif, system-ui, sans-serif;
 
   --animate-trusted-marquee: trusted-marquee 36s linear infinite;
   --animate-hero-reveal: hero-reveal 300ms cubic-bezier(0.215, 0.61, 0.355, 1) both;

@@ -59,7 +59,11 @@ export default function DatabasePage() {
 
   return (
     <FadeIn>
-    <section className="space-y-4">
+    <section className="space-y-5">
+      {/* Now lives on the page itself rather than in Topbar - see
+          Topbar.jsx, which no longer carries a per-route title at all. */}
+      <h1 className="font-display text-[28px] font-semibold tracking-tight text-[#0a0e14]">Patient Database</h1>
+
       <div className="rounded-2xl bg-white p-4 border border-black/6 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
         <div className="flex flex-wrap items-center gap-2">
           <input

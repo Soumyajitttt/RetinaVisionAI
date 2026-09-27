@@ -4,7 +4,6 @@ import FadeIn from "../components/FadeIn";
 import GradeBadge from "../components/GradeBadge";
 import PatientReportCard from "../components/PatientReportCard";
 import DiscussModal from "../components/modals/DiscussModal";
-import { useAuth } from "../context/AuthContext";
 import * as referralsApi from "../api/referrals";
 
 // Same grade filter set DatabasePage.jsx uses for the PHC patient
@@ -44,44 +43,44 @@ function ReferralRow({ referral, expanded, onToggle }) {
     <Fragment>
       <tr
         onClick={onToggle}
-        className="cursor-pointer border-b border-black/5 last:border-0 hover:bg-[#f8f8f8]"
+        className="cursor-pointer border-b border-black/5 last:border-0 hover:bg-[#f8fafc]"
       >
-        <td className="px-4 py-3 font-ui font-semibold text-[#242424]">{referral.patientId}</td>
-        <td className="px-4 py-3">
+        <td className="px-4 py-4 font-ui font-medium text-[#0a0e14]">{referral.patientId}</td>
+        <td className="px-4 py-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#efeff0] font-ui text-xs font-bold text-[#010110]">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#eef2f6] font-ui text-xs font-semibold text-[#334155]">
               {initials}
             </div>
             <div className="min-w-0">
-              <div className="truncate font-ui font-medium text-[#010110]">
+              <div className="truncate font-ui font-medium text-[#0a0e14]">
                 {patient?.name || referral.patientName}
               </div>
               {patient?.age != null && patient?.gender && (
-                <div className="font-ui text-xs text-[#45545e]">
+                <div className="font-ui text-xs text-[#64748b]">
                   {patient.age} Yrs &middot; {patient.gender}
                 </div>
               )}
             </div>
           </div>
         </td>
-        <td className="px-4 py-3 font-ui text-sm text-[#45545e]">
+        <td className="px-4 py-4 font-ui text-sm text-[#334155]">
           {formatDate(referral.referredAt)}
-          <div className="font-ui text-xs text-[#8a8f98]">by {referral.referredByName || "a PHC clinician"}</div>
+          <div className="font-ui text-xs text-[#8a94a3]">by {referral.referredByName || "a PHC clinician"}</div>
         </td>
-        <td className="px-4 py-3">
+        <td className="px-4 py-4">
           {isGraded ? (
             <GradeBadge grade={analysis.grade} gradeText={analysis.gradeText} />
           ) : (
             <span className="font-ui text-xs text-[#8a8f98]">Not analysed</span>
           )}
         </td>
-        <td className="px-4 py-3">
+        <td className="px-4 py-4">
           <button
             onClick={(e) => {
               e.stopPropagation();
               onToggle();
             }}
-            className="flex items-center gap-1 rounded-full border border-black/15 px-3 py-1 font-ui text-xs font-semibold text-[#010110] transition hover:bg-[#f5f5f2]"
+            className="flex items-center gap-1 rounded-lg border border-black/10 px-3 py-1.5 font-ui text-xs font-medium text-[#0a0e14] transition hover:bg-[#f5f5f2]"
           >
             {expanded ? "Hide" : "View"}
             {expanded ? <ChevronUpIcon className="size-3.5" /> : <ChevronDownIcon className="size-3.5" />}
@@ -120,7 +119,6 @@ function ReferralRow({ referral, expanded, onToggle }) {
 }
 
 export default function DoctorInboxPage() {
-  const { user } = useAuth();
   const [referrals, setReferrals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -170,14 +168,12 @@ export default function DoctorInboxPage() {
 
   return (
     <FadeIn>
-      <section className="space-y-4">
-        <div className="rounded-2xl bg-white p-4 border border-black/[0.06] shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
-          {/* <p className="mb-3 font-ui text-sm text-[#45545e]">
-            Patients referred to {user?.name || "you"}
-            {user?.facility ? ` at ${user.facility}` : ""} by PHC clinicians. Tap a patient to see their
-            full screening report.
-          </p> */}
+      <section className="space-y-5">
+        {/* Now lives on the page itself rather than in Topbar - see
+            Topbar.jsx, which no longer carries a per-route title at all. */}
+        <h1 className="font-display text-[28px] font-semibold tracking-tight text-[#0a0e14]">My Patients</h1>
 
+        <div className="rounded-2xl bg-white p-4 border border-black/[0.06] shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
           <div className="flex flex-wrap items-center gap-2">
             <input
               type="text"
@@ -211,7 +207,7 @@ export default function DoctorInboxPage() {
         {error && <p className="font-ui text-sm text-red-600">{error}</p>}
 
         {!loading && !error && (
-          <div className="overflow-hidden rounded-2xl bg-white border border-black/6 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+          <div className="overflow-hidden rounded-2xl bg-white border border-black/[0.06] shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
             <table className="w-full table-fixed border-collapse text-left">
               <colgroup>
                 <col className="w-[12%]" />
@@ -221,12 +217,12 @@ export default function DoctorInboxPage() {
                 <col className="w-[18%]" />
               </colgroup>
               <thead>
-                <tr className="bg-[#f5f5f5] font-ui text-xs font-semibold uppercase text-[#45545e]">
-                  <th className="px-4 py-3">Patient ID</th>
-                  <th className="px-4 py-3">Name &amp; Details</th>
-                  <th className="px-4 py-3">Referred</th>
-                  <th className="px-4 py-3">Grade</th>
-                  <th className="px-4 py-3">Action</th>
+                <tr className="border-b border-black/[0.06] bg-[#f8fafc] font-ui text-xs font-medium uppercase tracking-wide text-[#64748b]">
+                  <th className="px-4 py-3.5">Patient ID</th>
+                  <th className="px-4 py-3.5">Name &amp; Details</th>
+                  <th className="px-4 py-3.5">Referred</th>
+                  <th className="px-4 py-3.5">Grade</th>
+                  <th className="px-4 py-3.5">Action</th>
                 </tr>
               </thead>
               <tbody>
