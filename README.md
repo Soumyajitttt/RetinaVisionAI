@@ -1,2 +1,1 @@
-# DR-Screening
 # RetinaVisionAI
