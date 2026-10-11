@@ -54,7 +54,7 @@ In rural India there is roughly **one eye doctor for every 100,000 people**. Dia
 ## Tech Stack
 
 - **Model / pipeline:** MATLAB (Image Processing Toolbox, Deep Learning Toolbox)
-- **Backend:** Node.js, Express, MongoDB (Mongoose), JWT auth, Multer, Sharp, Nodemailer, Socket/IO, Cloudinary
+- **Backend:** Node.js, Express, MongoDB (Mongoose), JWT auth, Multer, Sharp, Nodemailer, Socket.io, Cloudinary
 - **Frontend:** React, Vite, Tailwind CSS, React Router
 
 ---
