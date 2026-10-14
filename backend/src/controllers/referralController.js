@@ -43,16 +43,29 @@ const getMyReferrals = asyncHandler(async (req, res) => {
   }
   const deduped = Array.from(latestByPatient.values());
 
+  // Serve the snapshot frozen at send time - NOT the live Patient /
+  // AnalysisResult. Changes made on the PHC side after sending only reach
+  // the doctor when the PHC sends the patient again (new Referral row,
+  // new snapshot). Legacy referrals created before snapshots existed have
+  // no snapshot, so they fall back to the live data once and the result is
+  // saved, freezing them from that point on.
   const enriched = await Promise.all(
     deduped.map(async (r) => {
-      const [patient, analysis] = await Promise.all([
-        Patient.findOne({ patientId: r.patientId }),
-        AnalysisResult.findOne({ patientId: r.patientId })
-      ]);
+      if (!r.patientSnapshot && !r.analysisSnapshot) {
+        const [patient, analysis] = await Promise.all([
+          Patient.findOne({ patientId: r.patientId }),
+          AnalysisResult.findOne({ patientId: r.patientId })
+        ]);
+        if (patient || analysis) {
+          r.patientSnapshot = patient ? patient.toJSON() : null;
+          r.analysisSnapshot = analysis ? analysis.toJSON() : null;
+          await r.save();
+        }
+      }
       return {
         ...r.toJSON(),
-        patient: patient ? patient.toJSON() : null,
-        analysis: analysis ? analysis.toJSON() : null
+        patient: r.patientSnapshot || null,
+        analysis: r.analysisSnapshot || null
       };
     })
   );

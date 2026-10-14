@@ -50,16 +50,26 @@ async function markReadFor(discussion, doctorId) {
 // instant a thread is created) can keep calling this without it - unreadCount
 // then just falls back to 0.
 async function withPatientReport(discussion, viewerId) {
-  const [patient, analysis] = await Promise.all([
-    Patient.findOne({ patientId: discussion.patientId }),
-    AnalysisResult.findOne({ patientId: discussion.patientId })
-  ]);
+  // Use the report as it was SENT to a doctor (Referral snapshot), never the
+  // live PHC data. Prefer the viewer's own referral; otherwise fall back to
+  // the most recent referral of this patient to either participant (the
+  // invited doctor may never have been referred this patient directly).
+  const referrals = await Referral.find({
+    patientId: discussion.patientId,
+    specialistId: { $in: [discussion.startedBy, discussion.invitedDoctorId, viewerId].filter(Boolean) }
+  }).sort({ createdAt: -1 });
+
+  const chosen =
+    referrals.find((r) => r.specialistId === viewerId) ||
+    referrals.find((r) => r.specialistId === discussion.startedBy) ||
+    referrals[0] ||
+    null;
 
   return {
     ...discussion.toJSON(),
     unreadCount: viewerId ? unreadCountFor(discussion, viewerId) : 0,
-    patient: patient ? patient.toJSON() : null,
-    analysis: analysis ? analysis.toJSON() : null
+    patient: chosen?.patientSnapshot || null,
+    analysis: chosen?.analysisSnapshot || null
   };
 }
 
@@ -108,7 +118,7 @@ const createDiscussion = asyncHandler(async (req, res) => {
     return res.status(404).json({ error: "That doctor could not be found" });
   }
 
-  const patient = await Patient.findOne({ patientId });
+  const patient = ownReferral.patientSnapshot || null;
 
   const discussion = await Discussion.create({
     patientId,

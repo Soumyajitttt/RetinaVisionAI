@@ -103,7 +103,10 @@ const sendReferral = asyncHandler(async (req, res) => {
     referredBy: req.user?.id,
     referredByName: req.user?.name,
     emailStatus,
-    emailError
+    emailError,
+    // Freeze what the doctor is being sent (see Referral model comment).
+    patientSnapshot: patient ? patient.toJSON() : null,
+    analysisSnapshot: analysis ? analysis.toJSON() : null
   });
 
   const message =

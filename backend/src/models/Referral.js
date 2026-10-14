@@ -25,7 +25,14 @@ const referralSchema = new mongoose.Schema(
       enum: ["sent", "failed", "skipped"],
       default: "skipped"
     },
-    emailError: { type: String, default: "" }
+    emailError: { type: String, default: "" },
+    // Frozen copy of the patient + analysis exactly as they were when the PHC
+    // clicked "Send". The doctor's portal reads THIS, never the live
+    // Patient/AnalysisResult docs, so re-analysing or editing a patient on
+    // the PHC side does not leak into the doctor's view until the PHC
+    // sends the updated report again (which creates a new snapshot).
+    patientSnapshot: { type: mongoose.Schema.Types.Mixed, default: null },
+    analysisSnapshot: { type: mongoose.Schema.Types.Mixed, default: null }
   },
   { timestamps: true }
 );
@@ -36,6 +43,10 @@ referralSchema.set("toJSON", {
     ret.referredAt = ret.createdAt;
     delete ret._id;
     delete ret.__v;
+    // Snapshots are exposed via `patient` / `analysis` in the doctor inbox,
+    // not as raw fields (and the PHC history page doesn't need them).
+    delete ret.patientSnapshot;
+    delete ret.analysisSnapshot;
     return ret;
   }
 });
