@@ -99,7 +99,7 @@ RetinaVisionAI/
 |---|---|
 | Node.js 20+ | `node -v` |
 | MongoDB 6+ | Local install or a free MongoDB Atlas cluster |
-| MATLAB R2024a+ | **Optional.** Without it the backend returns mock results. Needs Image Processing Toolbox and Deep Learning Toolbox |
+| MATLAB R2024a+ | For Image Processing Toolbox and Deep Learning Toolbox |
 
 ### 1. Install dependencies
 
