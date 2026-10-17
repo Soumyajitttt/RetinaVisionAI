@@ -142,13 +142,7 @@ EMAIL_DEMO_RECIPIENT=
 
 `models/drNet.mat` (the trained CNN) is excluded from regular git tracking. Get it from the team and place it at `models/drNet.mat`.
 
-### 4. Create the uploads folder
-
-```bash
-mkdir -p backend/src/uploads
-```
-
-### 5. Run
+### 4. Run
 
 ```bash
 # Terminal 1
