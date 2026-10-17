@@ -4,6 +4,8 @@
 
 RetinaVision AI turns any Primary Health Centre (PHC) into a diabetic retinopathy (DR) screening point. A health worker uploads a retina (fundus) photo, even one taken on a smartphone, and the system grades the disease, shows *why* it made that decision, and refers high-risk patients to a specialist in one click.
 
+Demo video -> https://youtu.be/7Pvx6oEvqRg?si=dKT32cT2UV1CgszA
+
 ---
 
 ## The Problem
