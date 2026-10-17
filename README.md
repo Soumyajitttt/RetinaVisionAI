@@ -117,7 +117,7 @@ MONGODB_URI=mongodb://127.0.0.1:27017/dr-screening
 JWT_SECRET=change-this-to-a-long-random-string
 JWT_EXPIRES_IN=8h
 
-# MATLAB (leave blank to use mock results)
+# MATLAB 
 MATLAB_EXE=/Applications/MATLAB_R2026a.app/bin/matlab
 MATLAB_PROJECT_ROOT=/absolute/path/to/RetinaVisionAI   # folder containing runPipelineForWeb.m
 
