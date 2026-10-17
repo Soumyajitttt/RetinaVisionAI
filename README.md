@@ -10,7 +10,7 @@ Demo video -> https://youtu.be/7Pvx6oEvqRg?si=dKT32cT2UV1CgszA
 
 ## The Problem
 
-In rural India there is roughly **one eye doctor for every 100,000 people**. Diabetic retinopathy shows no symptoms in its early stages, so patients usually reach a specialist only after irreversible vision loss, even though this blindness is preventable with timely screening.
+In rural India there is roughly one eye doctor for every 100,000 people. It is not possible to detect symptoms early without medical assistance, so patients reach a specialist only after irreversible vision loss, even though this blindness is preventable with timely screening.
 
 ## Our Solution
 
