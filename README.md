@@ -174,7 +174,7 @@ Doctor accounts are created through the in-app registration flow.
 3. **Result / Grading:** view grade, confidence, lesion counts, and the explainability views (Original, Grad-CAM, Multi-Layer CAM, Cross-Method, Activations).
 4. **Report Preview:** review and download the PDF report.
 5. **Specialists:** send the report to a doctor by email; track it under **Referral History**.
-6. **Doctor login:** see referred patients under **My Patients** and start **Discussions** with other doctors.
+6. **Doctor login:** see referred patients under **My Patients** and start **Discussions** via chat and video call with other doctors.
 
 ---
 
