@@ -32,7 +32,7 @@ In rural India there is roughly one eye doctor for every 100,000 people. It is n
 | **Explainability suite** | Grad-CAM, Multi-Layer CAM, Cross-Method verification (Grad-CAM vs Occlusion vs LIME) and layer Activations |
 | **Reports** | Auto-generated clinical report with all explainability images, printable as PDF |
 | **Referrals** | One-click referral to a specialist by email with the PDF attached, plus a searchable referral history |
-| **Doctor workspace** | Separate doctor role with a "My Patients" inbox and in-app case discussions with the full report attached |
+| **Doctor workspace** | Separate doctor role with a "My Patients" inbox and in-app case discussions (chat room and video call) with the full report attached |
 | **Cloud image storage** | MATLAB outputs are compressed and stored on Cloudinary; local job folders are cleaned up automatically |
 
 ---
